@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <group
+        android:id="@+id/nav_functions"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_measure"
+            android:icon="@drawable/ic_menu_measure"
+            android:title="@string/Measure" />
+        <item
+            android:id="@+id/nav_read_values"
+            android:icon="@drawable/ic_menu_read"
+            android:title="@string/Values" />
+        <item
+            android:id="@+id/nav_read_config"
+            android:icon="@drawable/ic_menu_read"
+            android:title="@string/Config" />
+        <item
+            android:id="@+id/nav_read_calibration"
+            android:icon="@drawable/ic_menu_read"
+            android:title="@string/Calibration" />
+        <item
+            android:id="@+id/nav_read_misc"
+            android:icon="@drawable/ic_menu_read"
+            android:title="@string/Misc" />
+    </group>
+
+    <item android:title="Отладка">
+        <menu>
+            <item
+                android:id="@+id/nav_terminal"
+                android:icon="@drawable/ic_menu_terminal"
+                android:title="Терминал" />
+        </menu>
+    </item>
+
+</menu>
