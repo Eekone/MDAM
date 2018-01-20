@@ -28,17 +28,17 @@ public class BKM1DataParsingTest {
 
     @Test
     public void configParsing_isCorrect() throws Exception {
-        compare(configInput, "valuesRegisters.json", 10);
+        compare(configInput, "configRegisters.json", 10);
     }
 
     @Test
     public void calibrationParsing_isCorrect() throws Exception {
-        compare(calibrationInput, "valuesRegisters.json", 15);
+        compare(calibrationInput, "calibrationRegisters.json", 15);
     }
 
     @Test
     public void miscParsing_isCorrect() throws Exception {
-        compare(miscInput, "valuesRegisters.json", 30);
+        compare(miscInput, "miscRegisters.json", 30);
     }
 
     private void compare(byte[] inputData, String expectedFilePath, int firstRegister) throws Exception {
