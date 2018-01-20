@@ -5,6 +5,7 @@ import android.content.res.Resources;
 
 import com.texnoprom.mdam.R;
 
+//TODO: Use maps instead
 public abstract class RegisterInfo {
     private static String[] BKM1Titles;
     private static String[] BKM1Units;

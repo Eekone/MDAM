@@ -1,0 +1,72 @@
+[
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 0,
+    "name": "No Context!",
+    "value": 0.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 1,
+    "name": "No Context!",
+    "value": 0.01
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 2,
+    "name": "No Context!",
+    "value": 0.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 3,
+    "name": "No Context!",
+    "value": 1.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 4,
+    "name": "No Context!",
+    "value": 968.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 5,
+    "name": "No Context!",
+    "value": 968.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 6,
+    "name": "No Context!",
+    "value": 968.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 7,
+    "name": "No Context!",
+    "value": 31.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 8,
+    "name": "No Context!",
+    "value": 4.14
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 9,
+    "name": "No Context!",
+    "value": 968.0
+  }
+]

@@ -26,15 +26,11 @@ import android.widget.Toast;
 import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.adapters.MMPRFragmentsAdapter;
 import com.texnoprom.mdam.fragments.TCPFragment;
-import com.texnoprom.mdam.models.BTRegister;
 import com.texnoprom.mdam.models.RegisterInfo;
-import com.texnoprom.mdam.services.JSONHelper;
 import com.zgkxzx.modbus4And.requset.ModbusParam;
 import com.zgkxzx.modbus4And.requset.ModbusReq;
 import com.zgkxzx.modbus4And.requset.OnRequestBack;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import okhttp3.MediaType;
@@ -248,7 +244,7 @@ public class TCPActivity extends AppCompatActivity {
     }
 
     public void sendGSON(View v) {
-        List<BTRegister> BTRegisters = new ArrayList<>();
+       /* List<BTRegister> BTRegisters = new ArrayList<>();
         for (TCPFragment fr : mMMPRFragmentsAdapter.fragmentsList) {
             for (BTRegister reg : fr.BTRegisters) {
                 BTRegisters.add(reg);
@@ -256,7 +252,7 @@ public class TCPActivity extends AppCompatActivity {
         }
 
         JSONHelper.sendBatch("http://texnoprom.ddns.net/post", BTRegisters, this);
-
+*/
     }
 
 

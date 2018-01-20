@@ -5,16 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import com.texnoprom.mdam.models.BTRegister;
-import com.texnoprom.mdam.models.Register;
-import com.texnoprom.mdam.models.RegisterBatch;
-
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -30,7 +21,7 @@ abstract public class JSONHelper {
     private static final OkHttpClient client = new OkHttpClient();
 
 
-    public static void sendRegisters(String URL, List<BTRegister> BTRegisters, Context con) {
+    /*public static void sendRegisters(String URL, List<BTRegister> BTRegisters, Context con) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         Type type = new TypeToken<List<BTRegister>>() {
         }.getType();
@@ -40,8 +31,7 @@ abstract public class JSONHelper {
 
     public static void sendBatch(String URL, List<BTRegister> BTRegisters, Context con) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        Type type = new TypeToken<RegisterBatch>() {
-        }.getType();
+        Type type = new TypeToken<RegisterBatch>() {}.getType();
         RegisterBatch batch = new RegisterBatch();
         batch.setTimestamp(BTRegisters.get(0).getTimestamp());
         batch.setType(BTRegisters.get(0).getType());
@@ -51,7 +41,7 @@ abstract public class JSONHelper {
         }
         String s = gson.toJson(batch, type);
         sendGSON(URL, s, con);
-    }
+    }*/
 
 
     private static void sendGSON(String URL, String s, final Context con) {

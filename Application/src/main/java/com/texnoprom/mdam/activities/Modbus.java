@@ -7,8 +7,9 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+//ToDo: Implement/use trird-party Modbus library instead of hardcoded commands
 public class Modbus {
-    //ToDo: команды ModBus, парсинг строк
+
     public static byte[] MEASURE = {1, 5, 0, 5, -1, 0, (byte) 156, 59};
     public static byte[] VALUES = {1, 3, 0, 0, 0, 10, (byte) 197, (byte) 205};
     public static byte[] CONFIG = {1, 3, 0, 10, 0, 5, (byte) 165, (byte) 203};
@@ -56,7 +57,6 @@ public class Modbus {
         return reversed;
     }
 
-    //ToDo: подавать байт-код запроса
     public static ArrayList<BTRegister> RegistersFromData(byte[] data, String type, int firstRegister) {
         ArrayList<BTRegister> BTRegisters = new ArrayList<BTRegister>();
         BTRegisters.clear();

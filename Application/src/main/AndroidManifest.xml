@@ -32,18 +32,12 @@
         </activity>
         <activity android:name="com.texnoprom.mdam.activities.BTActivity" />
         <activity
-            android:name="com.texnoprom.mdam.activities.TestActivity"
-            android:theme="@style/AppBaseTheme" />
-        <activity
             android:name="com.texnoprom.mdam.activities.LoginActivity"
             android:label="@string/title_activity_login" />
         <activity
             android:name="com.texnoprom.mdam.activities.BTDevicesActivity"
             android:label="Выберите устройство" />
 
-        <service
-            android:name="com.texnoprom.mdam.services.ExampleService"
-            android:enabled="true" />
         <service
             android:name="com.texnoprom.mdam.services.AuthenticatorService"
             android:exported="false">
