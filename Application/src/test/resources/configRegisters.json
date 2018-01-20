@@ -2,71 +2,36 @@
   {
     "type": "БКМ1",
     "command": 3,
-    "number": 0,
-    "name": "No Context!",
-    "value": 0.0
-  },
-  {
-    "type": "БКМ1",
-    "command": 3,
-    "number": 1,
-    "name": "No Context!",
-    "value": 0.01
-  },
-  {
-    "type": "БКМ1",
-    "command": 3,
-    "number": 2,
-    "name": "No Context!",
-    "value": 0.0
-  },
-  {
-    "type": "БКМ1",
-    "command": 3,
-    "number": 3,
+    "number": 10,
     "name": "No Context!",
     "value": 1.0
   },
   {
     "type": "БКМ1",
     "command": 3,
-    "number": 4,
+    "number": 11,
     "name": "No Context!",
-    "value": 968.0
+    "value": 9600.0
   },
   {
     "type": "БКМ1",
     "command": 3,
-    "number": 5,
+    "number": 12,
     "name": "No Context!",
-    "value": 968.0
+    "value": 0.0
   },
   {
     "type": "БКМ1",
     "command": 3,
-    "number": 6,
+    "number": 13,
     "name": "No Context!",
-    "value": 968.0
+    "value": 0.0
   },
   {
     "type": "БКМ1",
     "command": 3,
-    "number": 7,
+    "number": 14,
     "name": "No Context!",
-    "value": 31.0
-  },
-  {
-    "type": "БКМ1",
-    "command": 3,
-    "number": 8,
-    "name": "No Context!",
-    "value": 4.14
-  },
-  {
-    "type": "БКМ1",
-    "command": 3,
-    "number": 9,
-    "name": "No Context!",
-    "value": 968.0
+    "value": 0.0
   }
 ]

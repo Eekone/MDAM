@@ -11,62 +11,97 @@
     "command": 3,
     "number": 16,
     "name": "No Context!",
-    "value": 1.0
+    "value": 28.0
   },
   {
     "type": "БКМ1",
     "command": 3,
     "number": 17,
     "name": "No Context!",
-    "value": 0.0
+    "value": 500.0
   },
   {
     "type": "БКМ1",
     "command": 3,
     "number": 18,
     "name": "No Context!",
-    "value": 1.0
+    "value": 0.0
   },
   {
     "type": "БКМ1",
     "command": 3,
     "number": 19,
     "name": "No Context!",
-    "value": 968.0
+    "value": 78.0
   },
   {
     "type": "БКМ1",
     "command": 3,
     "number": 20,
     "name": "No Context!",
-    "value": 968.0
+    "value": 500.0
   },
   {
     "type": "БКМ1",
     "command": 3,
     "number": 21,
     "name": "No Context!",
-    "value": 968.0
+    "value": 0.0
   },
   {
     "type": "БКМ1",
     "command": 3,
     "number": 22,
     "name": "No Context!",
-    "value": 31.0
+    "value": 78.0
   },
   {
     "type": "БКМ1",
     "command": 3,
     "number": 23,
     "name": "No Context!",
-    "value": 414.0
+    "value": 500.0
   },
   {
     "type": "БКМ1",
     "command": 3,
     "number": 24,
     "name": "No Context!",
-    "value": 968.0
+    "value": 0.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 25,
+    "name": "No Context!",
+    "value": 293.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 26,
+    "name": "No Context!",
+    "value": 101.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 27,
+    "name": "No Context!",
+    "value": 0.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 28,
+    "name": "No Context!",
+    "value": 11.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 29,
+    "name": "No Context!",
+    "value": 3000.0
   }
 ]

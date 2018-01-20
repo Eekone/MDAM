@@ -2,71 +2,78 @@
   {
     "type": "БКМ1",
     "command": 3,
-    "number": 0,
+    "number": 30,
+    "name": "No Context!",
+    "value": 5.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 31,
     "name": "No Context!",
     "value": 0.0
   },
   {
     "type": "БКМ1",
     "command": 3,
-    "number": 1,
-    "name": "No Context!",
-    "value": 0.01
-  },
-  {
-    "type": "БКМ1",
-    "command": 3,
-    "number": 2,
+    "number": 32,
     "name": "No Context!",
     "value": 0.0
   },
   {
     "type": "БКМ1",
     "command": 3,
-    "number": 3,
+    "number": 33,
+    "name": "No Context!",
+    "value": 0.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 34,
+    "name": "No Context!",
+    "value": 0.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 35,
+    "name": "No Context!",
+    "value": 0.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 36,
+    "name": "No Context!",
+    "value": 2017.0
+  },
+  {
+    "type": "БКМ1",
+    "command": 3,
+    "number": 37,
     "name": "No Context!",
     "value": 1.0
   },
   {
     "type": "БКМ1",
     "command": 3,
-    "number": 4,
+    "number": 38,
     "name": "No Context!",
-    "value": 968.0
+    "value": 1.0
   },
   {
     "type": "БКМ1",
     "command": 3,
-    "number": 5,
+    "number": 39,
     "name": "No Context!",
-    "value": 968.0
+    "value": 0.0
   },
   {
     "type": "БКМ1",
     "command": 3,
-    "number": 6,
+    "number": 40,
     "name": "No Context!",
-    "value": 968.0
-  },
-  {
-    "type": "БКМ1",
-    "command": 3,
-    "number": 7,
-    "name": "No Context!",
-    "value": 31.0
-  },
-  {
-    "type": "БКМ1",
-    "command": 3,
-    "number": 8,
-    "name": "No Context!",
-    "value": 4.14
-  },
-  {
-    "type": "БКМ1",
-    "command": 3,
-    "number": 9,
-    "name": "No Context!",
-    "value": 968.0
+    "value": 200.0
   }
 ]
