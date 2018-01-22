@@ -244,14 +244,14 @@ public class TCPActivity extends AppCompatActivity {
     }
 
     public void sendGSON(View v) {
-       /* List<BTRegister> BTRegisters = new ArrayList<>();
+       /* List<Register> registerBatch = new ArrayList<>();
         for (TCPFragment fr : mMMPRFragmentsAdapter.fragmentsList) {
-            for (BTRegister reg : fr.BTRegisters) {
-                BTRegisters.add(reg);
+            for (Register reg : fr.registerBatch) {
+                registerBatch.add(reg);
             }
         }
 
-        JSONHelper.sendBatch("http://texnoprom.ddns.net/post", BTRegisters, this);
+        JSONHelper.sendBatch("http://texnoprom.ddns.net/post", registerBatch, this);
 */
     }
 

@@ -18,14 +18,12 @@ import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.activities.BTActivity;
 import com.texnoprom.mdam.activities.Modbus;
 import com.texnoprom.mdam.adapters.RegisterAdapter;
-import com.texnoprom.mdam.models.BTRegister;
-
-import java.util.ArrayList;
+import com.texnoprom.mdam.models.RegisterBatch;
 
 
 public class CalibrationsFragment extends Fragment {
 
-    ArrayList<BTRegister> BTRegisters;
+    RegisterBatch registerBatch;
     ListView listView;
     int position = 0, top;
     SwipeRefreshLayout srl;
@@ -57,9 +55,8 @@ public class CalibrationsFragment extends Fragment {
     public void handleInputData(byte[] data, String deviceType) {
         if (data[1] == 3) {
             srl.setRefreshing(false);
-            BTRegisters = new ArrayList<>();
-            BTRegisters = Modbus.RegistersFromData(data, deviceType, 15);
-            RegisterAdapter adapter = new RegisterAdapter(BTRegisters, getActivity());
+            registerBatch = Modbus.RegistersFromData(data, deviceType, 15);
+            RegisterAdapter adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
             listView.setAdapter(adapter);
             listView.setSelectionFromTop(position, top);
 
@@ -75,7 +72,7 @@ public class CalibrationsFragment extends Fragment {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             ((BTActivity) getActivity()).sen(Modbus.presetRegister(1,
-                                    BTRegisters.get(0).getRegNumber() + arg2,
+                                    registerBatch.getRegisters().get(0).getNumber() + arg2,
                                     Integer.valueOf(input.getText().toString())));
                         }
                     });

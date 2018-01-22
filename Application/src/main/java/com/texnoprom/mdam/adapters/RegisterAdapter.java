@@ -9,24 +9,24 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.texnoprom.mdam.R;
-import com.texnoprom.mdam.models.BTRegister;
+import com.texnoprom.mdam.models.Register;
 
 import java.util.List;
 
-public class RegisterAdapter extends ArrayAdapter<BTRegister> {
+public class RegisterAdapter extends ArrayAdapter<Register> {
 
     private Resources res;
-    private List<BTRegister> BTRegisters;
+    private List<Register> Registers;
 
-    public RegisterAdapter(List<BTRegister> data, Context context) {
+    public RegisterAdapter(List<Register> data, Context context) {
         super(context, R.layout.list_row, data);
-        this.BTRegisters = data;
+        this.Registers = data;
         this.res = context.getResources();
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        BTRegister BTRegister = getItem(position);
+        Register Register = getItem(position);
         ViewHolder viewHolder;
 
         if (convertView == null) {
@@ -42,10 +42,10 @@ public class RegisterAdapter extends ArrayAdapter<BTRegister> {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        viewHolder.regNumber.setText(res.getString(R.string.register_number_ph, BTRegister.getRegNumber() + 1));
-        viewHolder.regTitle.setText(BTRegister.getName());
-        viewHolder.regValue.setText(Float.toString(BTRegister.getValue()));
-        // viewHolder.regUnit.setText(RegisterInfo.Unit(BTRegister));
+        viewHolder.regNumber.setText(res.getString(R.string.register_number_ph, Register.getNumber() + 1));
+        viewHolder.regTitle.setText(Register.getName());
+        viewHolder.regValue.setText(Float.toString(Register.getValue()));
+        // viewHolder.regUnit.setText(RegisterInfo.Unit(Register));
 
         return convertView;
     }

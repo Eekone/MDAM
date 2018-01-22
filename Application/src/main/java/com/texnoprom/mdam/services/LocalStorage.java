@@ -5,12 +5,11 @@ import android.os.Environment;
 import android.widget.Toast;
 
 import com.texnoprom.mdam.activities.Modbus;
-import com.texnoprom.mdam.models.BTRegister;
+import com.texnoprom.mdam.models.RegisterBatch;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -19,14 +18,14 @@ import java.util.Date;
 
 public abstract class LocalStorage {
     public static void saveData(byte[] data, Context context) {
-        ArrayList<BTRegister> ar = Modbus.RegistersFromData(data, "БКМ1", 0);
+        RegisterBatch ar = Modbus.RegistersFromData(data, "БКМ1", 0);
         FileWriter f;
         File myFile = new File(Environment.getExternalStorageDirectory() + "/mysdfile.txt");
         try {
             f = new FileWriter(myFile, true);
             f.write(DateFormat.getDateTimeInstance().format(new Date()) + "\n" + "Имя" + "\n");
-            for (int i = 0; i < ar.size(); i++) {
-                f.write(Float.toString(ar.get(i).getValue()) + "\t\t\t");
+            for (int i = 0; i < ar.getRegisters().size(); i++) {
+                f.write(Float.toString(ar.getRegisters().get(i).getValue()) + "\t\t\t");
             }
             f.write("\n\n");
             f.flush();

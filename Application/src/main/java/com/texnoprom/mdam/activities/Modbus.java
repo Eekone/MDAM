@@ -1,14 +1,20 @@
 package com.texnoprom.mdam.activities;
 
 
-import com.texnoprom.mdam.models.BTRegister;
+import com.texnoprom.mdam.models.Register;
+import com.texnoprom.mdam.models.RegisterBatch;
+import com.texnoprom.mdam.models.RegisterInfo;
 
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Locale;
 
 //ToDo: Implement/use trird-party Modbus library instead of hardcoded commands
 public class Modbus {
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd:mm:YYYY HH:mm:ss", Locale.getDefault());
 
     public static byte[] MEASURE = {1, 5, 0, 5, -1, 0, (byte) 156, 59};
     public static byte[] VALUES = {1, 3, 0, 0, 0, 10, (byte) 197, (byte) 205};
@@ -57,18 +63,21 @@ public class Modbus {
         return reversed;
     }
 
-    public static ArrayList<BTRegister> RegistersFromData(byte[] data, String type, int firstRegister) {
-        ArrayList<BTRegister> BTRegisters = new ArrayList<BTRegister>();
-        BTRegisters.clear();
-        int regNum = firstRegister;
+    public static RegisterBatch RegistersFromData(byte[] data, String type, int firstRegister) {
+
+        ArrayList<Register> registers = new ArrayList<>();
+        registers.clear();
+        String date = dateFormat.format(new Date());
+        int command = data[1];
+        int number = firstRegister;
         for (int i = 3; i < data.length - 2; i = i + 2) {
             byte val[] = Arrays.copyOfRange(data, i, i + 2);
             ByteBuffer wrapped = ByteBuffer.wrap(val);
             short value = wrapped.getShort();
-            BTRegisters.add(new BTRegister(type, 3, regNum, value));
-            regNum++;
+            registers.add(new Register(command, number, RegisterInfo.Name(type, command, number), value));
+            number++;
         }
-        return BTRegisters;
+        return new RegisterBatch(date, type, registers);
     }
 
     public byte[] forceSingleCoil(byte address, short register, boolean value) {
@@ -84,5 +93,4 @@ public class Modbus {
 
         return command;
     }
-
 }

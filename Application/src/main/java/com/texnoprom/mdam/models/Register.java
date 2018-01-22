@@ -15,6 +15,13 @@ public class Register {
         this.number = number;
         this.name = name;
         this.value = value;
+        /*  switch (type) {
+            case "БКМ1":
+                this.value = (number < 3 || number == 8) ? value / 100 : value;
+                break;
+            default:
+                this.value = value;
+        }*/
     }
 
     public int getCommand() {

@@ -12,17 +12,18 @@ import android.widget.ListView;
 
 import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.adapters.RegisterAdapter;
-import com.texnoprom.mdam.models.BTRegister;
+import com.texnoprom.mdam.models.Register;
+import com.texnoprom.mdam.models.RegisterBatch;
+import com.texnoprom.mdam.models.RegisterInfo;
 import com.zgkxzx.modbus4And.requset.ModbusReq;
 import com.zgkxzx.modbus4And.requset.OnRequestBack;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 
 public class TCPFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
-    public ArrayList<BTRegister> BTRegisters;
+    public RegisterBatch registerBatch;
     ListView listView;
     SwipeRefreshLayout srl;
     RegisterAdapter adapter;
@@ -86,12 +87,13 @@ public class TCPFragment extends Fragment implements SwipeRefreshLayout.OnRefres
                             @Override
                             public void run() {
                                 srl.setRefreshing(false);
-                                BTRegisters = new ArrayList<>();
+                                registerBatch = new RegisterBatch();
                                 for (int i = 0; i < data.length; i++) {
-                                    BTRegister BTRegister = new BTRegister(type, 3, i + firstRegister, data[i]);
-                                    BTRegisters.add(BTRegister);
+                                    Register register = new Register(3, i + firstRegister,
+                                            RegisterInfo.Name(type, 3, i + firstRegister), data[i]);
+                                    registerBatch.getRegisters().add(register);
                                 }
-                                adapter = new RegisterAdapter(BTRegisters, getActivity());
+                                adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
                                 listView.setAdapter(adapter);
                             }
                         });
@@ -104,9 +106,9 @@ public class TCPFragment extends Fragment implements SwipeRefreshLayout.OnRefres
                             @Override
                             public void run() {
                                 srl.setRefreshing(false);
-                                BTRegisters = new ArrayList<>();
+                                registerBatch = new RegisterBatch();
 
-                                adapter = new RegisterAdapter(BTRegisters, getActivity());
+                                adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
                                 listView.setAdapter(adapter);
                                 Log.e("NO", "readHoldingRegisters onFailed " + msg);
                             }
@@ -122,12 +124,13 @@ public class TCPFragment extends Fragment implements SwipeRefreshLayout.OnRefres
                             @Override
                             public void run() {
                                 srl.setRefreshing(false);
-                                BTRegisters = new ArrayList<>();
+                                registerBatch = new RegisterBatch();
                                 for (int i = 0; i < data.length; i++) {
-                                    BTRegister BTRegister = new BTRegister(type, 2, i + firstRegister, data[i] ? 1 : 0);
-                                    BTRegisters.add(BTRegister);
+                                    Register register = new Register(2, i + firstRegister,
+                                            RegisterInfo.Name(type, 2, i + firstRegister), data[i] ? 1 : 0);
+                                    registerBatch.getRegisters().add(register);
                                 }
-                                adapter = new RegisterAdapter(BTRegisters, getActivity());
+                                adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
                                 listView.setAdapter(adapter);
                             }
                         });
@@ -140,9 +143,9 @@ public class TCPFragment extends Fragment implements SwipeRefreshLayout.OnRefres
                             @Override
                             public void run() {
                                 srl.setRefreshing(false);
-                                BTRegisters = new ArrayList<>();
+                                registerBatch = new RegisterBatch();
 
-                                adapter = new RegisterAdapter(BTRegisters, getActivity());
+                                adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
                                 listView.setAdapter(adapter);
                                 Log.e("NO", "readHoldingRegisters onFailed " + msg);
                             }
@@ -158,12 +161,13 @@ public class TCPFragment extends Fragment implements SwipeRefreshLayout.OnRefres
                             @Override
                             public void run() {
                                 srl.setRefreshing(false);
-                                BTRegisters = new ArrayList<>();
+                                registerBatch = new RegisterBatch();
                                 for (int i = 0; i < data.length; i++) {
-                                    BTRegister BTRegister = new BTRegister(type, 4, i + firstRegister, data[i]);
-                                    BTRegisters.add(BTRegister);
+                                    Register register = new Register(4, i + firstRegister,
+                                            RegisterInfo.Name(type, 4, i + firstRegister), data[i]);
+                                    registerBatch.getRegisters().add(register);
                                 }
-                                adapter = new RegisterAdapter(BTRegisters, getActivity());
+                                adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
                                 listView.setAdapter(adapter);
                             }
                         });
@@ -176,9 +180,9 @@ public class TCPFragment extends Fragment implements SwipeRefreshLayout.OnRefres
                             @Override
                             public void run() {
                                 srl.setRefreshing(false);
-                                BTRegisters = new ArrayList<>();
+                                registerBatch = new RegisterBatch();
 
-                                adapter = new RegisterAdapter(BTRegisters, getActivity());
+                                adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
                                 listView.setAdapter(adapter);
                                 Log.e("NO", "readHoldingRegisters onFailed " + msg);
                             }

@@ -1,6 +1,6 @@
 package com.texnoprom.mdam.models;
-
-public class BTRegister {
+/*
+public class Register {
 
     private String type;
     private int command;
@@ -8,7 +8,7 @@ public class BTRegister {
     private String name;
     private float value;
 
-    public BTRegister(String type, int command, int number, float value) {
+    public Register(String type, int command, int number, float value) {
         this.type = type;
         this.name = RegisterInfo.Name(type, command, number);
         this.number = number;
@@ -30,7 +30,7 @@ public class BTRegister {
         return type;
     }
 
-    public int getRegNumber() {
+    public int getNumber() {
         return number;
     }
 
@@ -42,3 +42,4 @@ public class BTRegister {
         return command;
     }
 }
+*/

@@ -16,14 +16,12 @@ import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.activities.BTActivity;
 import com.texnoprom.mdam.activities.Modbus;
 import com.texnoprom.mdam.adapters.RegisterAdapter;
-import com.texnoprom.mdam.models.BTRegister;
-
-import java.util.ArrayList;
+import com.texnoprom.mdam.models.RegisterBatch;
 
 
 public class ValuesFragment extends Fragment {
 
-    ArrayList<BTRegister> BTRegisters;
+    RegisterBatch registerBatch;
     ListView listView;
     SwipeRefreshLayout srl;
 
@@ -55,9 +53,8 @@ public class ValuesFragment extends Fragment {
     public void handleInputData(byte[] data, String deviceType) {
         if (data[1] == 3) {
             srl.setRefreshing(false);
-            BTRegisters = new ArrayList<>();
-            BTRegisters = Modbus.RegistersFromData(data, deviceType, 0);
-            RegisterAdapter adapter = new RegisterAdapter(BTRegisters, getActivity());
+            registerBatch = Modbus.RegistersFromData(data, deviceType, 0);
+            RegisterAdapter adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
             listView.setAdapter(adapter);
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 public void onItemClick(AdapterView<?> arg0, View arg1, final int arg2, long arg3) {

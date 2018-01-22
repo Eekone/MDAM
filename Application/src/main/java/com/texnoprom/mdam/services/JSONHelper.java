@@ -21,22 +21,22 @@ abstract public class JSONHelper {
     private static final OkHttpClient client = new OkHttpClient();
 
 
-    /*public static void sendRegisters(String URL, List<BTRegister> BTRegisters, Context con) {
+    /*public static void sendRegisters(String URL, List<Register> registerBatch, Context con) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        Type type = new TypeToken<List<BTRegister>>() {
+        Type type = new TypeToken<List<Register>>() {
         }.getType();
-        String s = gson.toJson(BTRegisters, type);
+        String s = gson.toJson(registerBatch, type);
         sendGSON(URL, s, con);
     }
 
-    public static void sendBatch(String URL, List<BTRegister> BTRegisters, Context con) {
+    public static void sendBatch(String URL, List<Register> registerBatch, Context con) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         Type type = new TypeToken<RegisterBatch>() {}.getType();
         RegisterBatch batch = new RegisterBatch();
-        batch.setTimestamp(BTRegisters.get(0).getTimestamp());
-        batch.setType(BTRegisters.get(0).getType());
-        for (BTRegister btreg : BTRegisters) {
-            Register reg = new Register(btreg.getCommand(), btreg.getRegNumber(), btreg.getName(), btreg.getValue());
+        batch.setTimestamp(registerBatch.get(0).getTimestamp());
+        batch.setType(registerBatch.get(0).getType());
+        for (Register btreg : registerBatch) {
+            Register reg = new Register(btreg.getCommand(), btreg.getNumber(), btreg.getName(), btreg.getValue());
             batch.registers.add(reg);
         }
         String s = gson.toJson(batch, type);

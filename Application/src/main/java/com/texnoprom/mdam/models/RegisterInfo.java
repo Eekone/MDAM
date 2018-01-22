@@ -37,37 +37,37 @@ public abstract class RegisterInfo {
         OPE11_4Titles = res.getStringArray(R.array.OPE11_4_titles);
     }
 
-    public static String Name(BTRegister BTRegister) {
+    public static String Name(Register register, String type) {
         if (!contextPassed) return "No Context!";
 
         try {
-            switch (BTRegister.getCommand()) {
+            switch (register.getCommand()) {
                 case 2:
-                    switch (BTRegister.getType()) {
+                    switch (type) {
                         case "ОПЕ11":
-                            return OPE11_2Titles[BTRegister.getRegNumber()];
+                            return OPE11_2Titles[register.getNumber()];
                         default:
                             return "No Such Type!";
 
                     }
 
                 case 3:
-                    switch (BTRegister.getType()) {
+                    switch (type) {
                         case "БКМ1":
-                            return BKM1Titles[BTRegister.getRegNumber()];
+                            return BKM1Titles[register.getNumber()];
                         case "БКМ4":
-                            return BKM4Titles[BTRegister.getRegNumber()];
+                            return BKM4Titles[register.getNumber()];
                         case "ММПР":
-                            return MMPRTitles[BTRegister.getRegNumber()];
+                            return MMPRTitles[register.getNumber()];
                         case "ОПЕ11":
-                            return OPE11_3Titles[BTRegister.getRegNumber()];
+                            return OPE11_3Titles[register.getNumber()];
                         default:
                             return "No Such Type!";
                     }
                 case 4:
-                    switch (BTRegister.getType()) {
+                    switch (type) {
                         case "ОПЕ11":
-                            return OPE11_4Titles[BTRegister.getRegNumber()];
+                            return OPE11_4Titles[register.getNumber()];
                         default:
                             return "No Such Type!";
 
@@ -124,19 +124,19 @@ public abstract class RegisterInfo {
     }
 
 
-    public static String Unit(BTRegister BTRegister) {
+    public static String Unit(Register register, String type) {
         if (!contextPassed) return "No Context!";
 
         try {
-            switch (BTRegister.getCommand()) {
+            switch (register.getCommand()) {
                 case 2:
                     return "";
                 case 3:
-                    switch (BTRegister.getType()) {
+                    switch (type) {
                         case "БКМ1":
-                            return BKM1Units[BTRegister.getRegNumber()];
+                            return BKM1Units[register.getNumber()];
                         case "ММПР":
-                            return MMPRUnits[BTRegister.getRegNumber()];
+                            return MMPRUnits[register.getNumber()];
                         default:
                             return "?";
                     }

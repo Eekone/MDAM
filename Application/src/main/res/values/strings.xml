@@ -33,7 +33,7 @@
 
     <string name="register_number_ph">"["%1$d"] "</string>
 
-    <!-- BBTRegisterster Titles -->
+    <!-- BRegisterster Titles -->
     <string-array name="BKM1_3_titles">
         <item>Потенциал</item>
         <item>Поляризационный потенциал</item>
@@ -78,7 +78,7 @@
         <item>Время работы</item>
     </string-array>
 
-    <!-- BBTRegisterster Units -->
+    <!-- BRegisterster Units -->
     <string-array name="BKM1_units">
         <item>В</item>
         <item>В</item>
@@ -123,7 +123,7 @@
         <item>с</item>
     </string-array>
 
-    <!-- BTRegisterster Titles -->
+    <!-- Registerster Titles -->
     <string-array name="BKM4_titles">
         <item>Потенциал поляризационный канал-1  "00.00" В</item>
         <item>Потенциал поляризационный канал-2  "00.00" В</item>
