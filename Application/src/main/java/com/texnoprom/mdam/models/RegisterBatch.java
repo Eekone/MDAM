@@ -12,7 +12,12 @@ public class RegisterBatch {
     private String type;
 
     private List<Register> registers = new ArrayList<>();
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd:mm:YYYY HH:mm:ss", Locale.getDefault());
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.getDefault());
+
+    public RegisterBatch(String type) {
+        this.timestamp = dateFormat.format(new Date());
+        this.type = type;
+    }
 
     public RegisterBatch() {
         this.timestamp = dateFormat.format(new Date());

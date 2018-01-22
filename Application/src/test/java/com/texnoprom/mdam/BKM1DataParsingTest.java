@@ -1,5 +1,5 @@
 package com.texnoprom.mdam;
-
+/*
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -70,4 +70,4 @@ public class BKM1DataParsingTest {
 
         assertEquals(expected, actual);
     }
-}
+}*/

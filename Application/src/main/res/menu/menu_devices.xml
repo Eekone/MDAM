@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:title="Выйти"
+        android:title="@string/Exit"
         android:id="@+id/dlogin"
         android:icon="@drawable/ic_exit"
         app:showAsAction="always" />

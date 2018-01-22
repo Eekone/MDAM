@@ -18,6 +18,7 @@ import com.texnoprom.mdam.R;
 
 import java.util.regex.Pattern;
 
+//TODO: Use TCPSettingsActivity instead of alertdialog
 public class TCPSettingsActivity extends AppCompatActivity {
 
 

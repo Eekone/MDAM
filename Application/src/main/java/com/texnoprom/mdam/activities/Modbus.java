@@ -14,7 +14,7 @@ import java.util.Locale;
 
 //ToDo: Implement/use trird-party Modbus library instead of hardcoded commands
 public class Modbus {
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd:mm:YYYY HH:mm:ss", Locale.getDefault());
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.getDefault());
 
     public static byte[] MEASURE = {1, 5, 0, 5, -1, 0, (byte) 156, 59};
     public static byte[] VALUES = {1, 3, 0, 0, 0, 10, (byte) 197, (byte) 205};

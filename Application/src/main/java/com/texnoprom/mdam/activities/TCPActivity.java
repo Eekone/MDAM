@@ -26,7 +26,10 @@ import android.widget.Toast;
 import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.adapters.MMPRFragmentsAdapter;
 import com.texnoprom.mdam.fragments.TCPFragment;
+import com.texnoprom.mdam.models.Register;
+import com.texnoprom.mdam.models.RegisterBatch;
 import com.texnoprom.mdam.models.RegisterInfo;
+import com.texnoprom.mdam.services.JSONHelper;
 import com.zgkxzx.modbus4And.requset.ModbusParam;
 import com.zgkxzx.modbus4And.requset.ModbusReq;
 import com.zgkxzx.modbus4And.requset.OnRequestBack;
@@ -244,15 +247,16 @@ public class TCPActivity extends AppCompatActivity {
     }
 
     public void sendGSON(View v) {
-       /* List<Register> registerBatch = new ArrayList<>();
+        RegisterBatch registerBatch = new RegisterBatch(deviceName);
+
         for (TCPFragment fr : mMMPRFragmentsAdapter.fragmentsList) {
-            for (Register reg : fr.registerBatch) {
-                registerBatch.add(reg);
+            for (Register reg : fr.registerBatch.getRegisters()) {
+                registerBatch.getRegisters().add(reg);
             }
         }
 
-        JSONHelper.sendBatch("http://texnoprom.ddns.net/post", registerBatch, this);
-*/
+        JSONHelper.sendBatch("http://95.220.137.189/post", registerBatch, this);
+
     }
 
 
