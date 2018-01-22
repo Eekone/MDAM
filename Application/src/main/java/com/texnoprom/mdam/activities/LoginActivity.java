@@ -75,9 +75,8 @@ public class LoginActivity extends AppCompatActivity {
             editor.putString("userName", name);
             editor.apply();
 
-            Intent startDevices = new Intent(LoginActivity.this, DevicesActivity.class);
+            Intent startDevices = new Intent(LoginActivity.this, MainActivity.class);
             LoginActivity.this.startActivity(startDevices);
-            finish();
         } else {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;

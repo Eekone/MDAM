@@ -63,7 +63,7 @@ public class BTActivity extends AppCompatActivity
 
         ActivityCompat.requestPermissions(BTActivity.this,
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-        setContentView(com.texnoprom.mdam.R.layout.activity_main);
+        setContentView(com.texnoprom.mdam.R.layout.activity_bluetooth);
         RegisterInfo.setContext(getApplicationContext());
         setupUI();
         setupBT();
@@ -132,7 +132,7 @@ public class BTActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
+        inflater.inflate(R.menu.menu_bluetooth, menu);
         return true;
     }
 

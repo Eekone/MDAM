@@ -44,11 +44,11 @@ public class Modbus {
         int crc = 0xFFFF;
 
         for (int pos = 0; pos < buf.length; pos++) {
-            crc ^= (int) buf[pos] & 0xFF;   // XOR byte into least sig. byte of crc
+            crc ^= (int) buf[pos] & 0xFF;
 
-            for (int i = 8; i != 0; i--) {    // Loop over each bit
-                if ((crc & 0x0001) != 0) {      // If the LSB is set
-                    crc >>= 1;                    // Shift right and XOR 0xA001
+            for (int i = 8; i != 0; i--) {
+                if ((crc & 0x0001) != 0) {
+                    crc >>= 1;
                     crc ^= 0xA001;
                 } else                            // Else LSB is not set
                     crc >>= 1;                    // Just shift right

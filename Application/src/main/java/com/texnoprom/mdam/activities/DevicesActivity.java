@@ -20,6 +20,8 @@ public class DevicesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_devices);
         Toolbar t = (Toolbar) findViewById(R.id.devicesToolbar);
         setSupportActionBar(t);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         Button OPE11 = (Button) findViewById(R.id.OPE11);
         OPE11.setOnClickListener(new View.OnClickListener() {

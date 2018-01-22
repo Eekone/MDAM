@@ -22,7 +22,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.texnoprom.mdam.activities.SplashScreen"
+            android:name=".activities.SplashScreen"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,16 +30,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.texnoprom.mdam.activities.BTActivity" />
+        <activity android:name=".activities.BTActivity" />
         <activity
-            android:name="com.texnoprom.mdam.activities.LoginActivity"
+            android:name=".activities.LoginActivity"
             android:label="@string/title_activity_login" />
         <activity
-            android:name="com.texnoprom.mdam.activities.BTDevicesActivity"
+            android:name=".activities.BTDevicesActivity"
             android:label="Выберите устройство" />
 
         <service
-            android:name="com.texnoprom.mdam.services.AuthenticatorService"
+            android:name=".services.AuthenticatorService"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
@@ -51,26 +51,42 @@
         </service>
 
         <activity
-            android:name="com.texnoprom.mdam.activities.DevicesActivity"
-            android:label="Выберите тип устройства" />
+            android:name=".activities.DevicesActivity"
+            android:label="Выберите тип устройства"
+            android:parentActivityName=".activities.MainActivity" />
         <activity
-            android:name="com.texnoprom.mdam.activities.AdministrationActivity"
+            android:name=".activities.AdministrationActivity"
             android:label="Добавление пользователей"
-            android:parentActivityName="com.texnoprom.mdam.activities.LoginActivity" />
+            android:parentActivityName=".activities.LoginActivity" />
         <activity
-            android:name="com.texnoprom.mdam.activities.TCPActivity"
+            android:name=".activities.TCPActivity"
             android:label="@string/title_activity_mmpr"
-            android:parentActivityName="com.texnoprom.mdam.activities.DevicesActivity"
+            android:parentActivityName=".activities.DevicesActivity"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.texnoprom.mdam.activities.DevicesActivity" />
         </activity>
         <activity
-            android:name="com.texnoprom.mdam.activities.TCPSettingsActivity"
+            android:name=".activities.TCPSettingsActivity"
             android:label="Параметры подключения"
-            android:parentActivityName="com.texnoprom.mdam.activities.TCPActivity">
+            android:parentActivityName=".activities.TCPActivity">
             >
+        </activity>
+        <activity
+            android:name=".activities.MainActivity"
+            android:label="Главное меню"
+            android:parentActivityName=".activities.LoginActivity"
+            >
+        </activity>
+        <activity
+            android:name=".activities.CaptureActivityPortrait"
+            android:screenOrientation="portrait"
+            android:stateNotNeeded="true"
+            android:theme="@style/zxing_CaptureTheme"
+            android:windowSoftInputMode="stateAlwaysHidden">
+            >
+
         </activity>
     </application>
 
