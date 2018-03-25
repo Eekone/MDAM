@@ -76,9 +76,7 @@
         <activity
             android:name=".activities.MainActivity"
             android:label="Главное меню"
-            android:parentActivityName=".activities.LoginActivity"
-            >
-        </activity>
+            android:parentActivityName=".activities.LoginActivity"></activity>
         <activity
             android:name=".activities.CaptureActivityPortrait"
             android:screenOrientation="portrait"
@@ -86,8 +84,12 @@
             android:theme="@style/zxing_CaptureTheme"
             android:windowSoftInputMode="stateAlwaysHidden">
             >
-
         </activity>
+        <activity
+            android:name=".activities.ArchiveActivity"
+            android:label="Локальный архив"
+            android:parentActivityName=".activities.MainActivity"></activity>
+        <activity android:name=".activities.TCTActivity"></activity>
     </application>
 
 </manifest>

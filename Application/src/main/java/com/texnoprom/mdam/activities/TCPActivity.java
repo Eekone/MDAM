@@ -158,7 +158,6 @@ public class TCPActivity extends AppCompatActivity {
         device.setHint(String.valueOf(prefs.getInt("device1", 1)));
         device.setInputType(InputType.TYPE_CLASS_NUMBER);
 
-
         LinearLayout ll = new LinearLayout(this);
         ll.setOrientation(LinearLayout.VERTICAL);
         ll.addView(ip);
@@ -256,6 +255,7 @@ public class TCPActivity extends AppCompatActivity {
         }
 
         JSONHelper.sendBatch("http://95.220.137.189/post", registerBatch, this);
+        // localDB.save(registerBatch);
 
     }
 

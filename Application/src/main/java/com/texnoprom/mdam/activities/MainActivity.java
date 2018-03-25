@@ -54,11 +54,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button tct = (Button) findViewById(R.id.tct_button);
+        tct.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent startTCT = new Intent(MainActivity.this, TCTActivity.class);
+                MainActivity.this.startActivity(startTCT);
+            }
+        });
+
         Button archive = (Button) findViewById(R.id.archive_btn);
-        archive.setEnabled(false);
         archive.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent startMain = new Intent(MainActivity.this, ArchiveActivity.class);
+                MainActivity.this.startActivity(startMain);
             }
         });
     }
@@ -69,16 +79,24 @@ public class MainActivity extends AppCompatActivity {
             if (result.getContents() == null)
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             else {
-                if (result.getContents().equals("ОПЕ11") || result.getContents().equals("ОПЕ14")) {
-                    Intent startMain = new Intent(MainActivity.this, TCPActivity.class);
-                    startMain.putExtra("deviceType", result.getContents());
-                    MainActivity.this.startActivity(startMain);
-                } else if (result.getContents().equals("БКМ1") || result.getContents().equals("БКМ4")) {
-                    Intent startMain = new Intent(MainActivity.this, BTActivity.class);
-                    startMain.putExtra("deviceType", result.getContents());
-                    MainActivity.this.startActivity(startMain);
-                } else {
-                    Toast.makeText(this, "Устройство не найдено", Toast.LENGTH_LONG).show();
+                switch (result.getContents()) {
+                    case "ОПЕ11":
+                    case "ОПЕ14": {
+                        Intent startMain = new Intent(MainActivity.this, TCPActivity.class);
+                        startMain.putExtra("deviceType", result.getContents());
+                        MainActivity.this.startActivity(startMain);
+                        break;
+                    }
+                    case "БКМ1":
+                    case "БКМ4": {
+                        Intent startMain = new Intent(MainActivity.this, BTActivity.class);
+                        startMain.putExtra("deviceType", result.getContents());
+                        MainActivity.this.startActivity(startMain);
+                        break;
+                    }
+                    default:
+                        Toast.makeText(this, "Устройство не найдено", Toast.LENGTH_LONG).show();
+                        break;
                 }
             }
 

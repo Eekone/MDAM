@@ -71,6 +71,17 @@
                 android:typeface="sans" />
 
             <Button
+                android:id="@+id/tct_button"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/layout_bg"
+                android:text="База данных ТСТ"
+                android:textSize="40sp"
+                android:typeface="sans" />
+
+            <Button
                 android:id="@+id/archive_btn"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"

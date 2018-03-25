@@ -22,6 +22,13 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 abstract public class JSONHelper {
+
+    public interface NetworkCallback {
+        void onSuccess(String repsonse);
+
+        void onFailure();
+    }
+
     private static final MediaType MEDIA_TYPE =
             MediaType.parse("application/json");
     private static final OkHttpClient client = new OkHttpClient();
@@ -37,7 +44,8 @@ abstract public class JSONHelper {
 
     public static void sendBatch(String URL, RegisterBatch registerBatch, Context con) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        Type type = new TypeToken<RegisterBatch>() {}.getType();
+        Type type = new TypeToken<RegisterBatch>() {
+        }.getType();
         String s = gson.toJson(registerBatch, type);
         sendGSON(URL, s, con);
     }
@@ -45,18 +53,15 @@ abstract public class JSONHelper {
 
     private static void sendGSON(String URL, String s, final Context con) {
         RequestBody body = RequestBody.create(MEDIA_TYPE, s);
-
         final Request request = new Request.Builder()
                 .url(URL)
                 .post(body)
                 .build();
+
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                String mMessage = e.getMessage();
-                Handler handler = new Handler(Looper.getMainLooper());
-
-                handler.post(new Runnable() {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
                         Toast.makeText(con, "Нет ответа", Toast.LENGTH_LONG).show();
@@ -66,8 +71,7 @@ abstract public class JSONHelper {
 
             @Override
             public void onResponse(Call call, final Response response) {
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
                         switch (response.code()) {
@@ -84,6 +88,47 @@ abstract public class JSONHelper {
                 });
 
 
+            }
+        });
+    }
+
+    public static void getJson(String URL, final NetworkCallback networkCallback, final Context context) {
+        final Request request = new Request.Builder()
+                .url(URL)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            Handler mainHandler = new Handler(context.getMainLooper());
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        networkCallback.onFailure();
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, final Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            networkCallback.onFailure();
+                        }
+                    });
+                    return;
+                }
+
+                final String jsonString = response.body().string();
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        networkCallback.onSuccess(jsonString);
+                    }
+                });
             }
         });
     }
