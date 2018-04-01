@@ -34,13 +34,13 @@ abstract public class JSONHelper {
     private static final OkHttpClient client = new OkHttpClient();
 
 
-   /* public static void sendRegisters(String URL, List<Register> registerBatch, Context con) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        Type type = new TypeToken<List<Register>>() {
-        }.getType();
-        String s = gson.toJson(registerBatch, type);
-        sendGSON(URL, s, con);
-    }*/
+//   /* public static void sendRegisters(String URL, List<Register> registerBatch, Context con) {
+//        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//        Type type = new TypeToken<List<Register>>() {
+//        }.getType();
+//        String s = gson.toJson(registerBatch, type);
+//        sendGSON(URL, s, con);
+//    }*/
 
     public static void sendBatch(String URL, RegisterBatch registerBatch, Context con) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -49,7 +49,6 @@ abstract public class JSONHelper {
         String s = gson.toJson(registerBatch, type);
         sendGSON(URL, s, con);
     }
-
 
     private static void sendGSON(String URL, String s, final Context con) {
         RequestBody body = RequestBody.create(MEDIA_TYPE, s);

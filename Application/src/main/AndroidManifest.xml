@@ -76,7 +76,7 @@
         <activity
             android:name=".activities.MainActivity"
             android:label="Главное меню"
-            android:parentActivityName=".activities.LoginActivity"></activity>
+            android:parentActivityName=".activities.LoginActivity" />
         <activity
             android:name=".activities.CaptureActivityPortrait"
             android:screenOrientation="portrait"
@@ -88,8 +88,12 @@
         <activity
             android:name=".activities.ArchiveActivity"
             android:label="Локальный архив"
+            android:parentActivityName=".activities.MainActivity" />
+        <activity
+            android:name=".activities.TCTActivity"
+            android:label="База данных ТСТ"
             android:parentActivityName=".activities.MainActivity"></activity>
-        <activity android:name=".activities.TCTActivity"></activity>
+
     </application>
 
 </manifest>

@@ -50,7 +50,6 @@
                 android:background="@drawable/ope_bg"
                 android:textSize="40sp"
                 android:typeface="sans" />
-
         </LinearLayout>
 
 
