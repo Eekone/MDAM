@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ParameterType {
+public class ParameterType implements ExpandableRowData {
 
     private Integer parameterTypesId;
     private Integer devTypeId;
@@ -18,6 +18,10 @@ public class ParameterType {
     private String paramTypeName;
     private Integer typeRelation;
     private String extraId;
+
+    public String getParentInfo() {
+        return paramTypeName;
+    }
 
     public ArrayList<String> getChildInfo() {
         ArrayList<String> list = new ArrayList<>();

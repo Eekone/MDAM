@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import lombok.Data;
 
 @Data
-public class CustomData {
+public class CustomData implements ExpandableRowData {
 
     private String readableParamValuesId;
     private String sessionBeginDateTime;
@@ -13,6 +13,10 @@ public class CustomData {
     private String paramName;
     private String paramValueTxt;
     private String measUnit;
+
+    public String getParentInfo() {
+        return sessionBeginDateTime;
+    }
 
     public ArrayList<String> getChildInfo() {
         ArrayList<String> list = new ArrayList<>();

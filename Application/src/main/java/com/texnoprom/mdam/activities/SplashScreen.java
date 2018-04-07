@@ -22,12 +22,9 @@ public class SplashScreen extends Activity {
         super.onCreate(icicle);
         setContentView(R.layout.activity_splash_screen);
 
-        /* New Handler to start the Menu-Activity
-         * and close this Splash-Screen after some seconds.*/
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                /* Create an Intent that will start the Menu-Activity. */
                 Intent mainIntent = new Intent(SplashScreen.this, LoginActivity.class);
                 SplashScreen.this.startActivity(mainIntent);
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);

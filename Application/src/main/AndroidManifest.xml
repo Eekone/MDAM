@@ -70,9 +70,7 @@
         <activity
             android:name=".activities.TCPSettingsActivity"
             android:label="Параметры подключения"
-            android:parentActivityName=".activities.TCPActivity">
-            >
-        </activity>
+            android:parentActivityName=".activities.TCPActivity" />
         <activity
             android:name=".activities.MainActivity"
             android:label="Главное меню"
@@ -92,8 +90,7 @@
         <activity
             android:name=".activities.TCTActivity"
             android:label="База данных ТСТ"
-            android:parentActivityName=".activities.MainActivity"></activity>
-
+            android:parentActivityName=".activities.MainActivity" />
     </application>
 
 </manifest>

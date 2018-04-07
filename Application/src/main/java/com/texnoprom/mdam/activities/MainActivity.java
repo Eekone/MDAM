@@ -48,11 +48,6 @@ public class MainActivity extends AppCompatActivity {
 
         Button tasks = (Button) findViewById(R.id.tasks_btn);
         tasks.setEnabled(false);
-        tasks.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            }
-        });
 
         Button tct = (Button) findViewById(R.id.tct_button);
         tct.setOnClickListener(new View.OnClickListener() {
@@ -64,13 +59,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Button archive = (Button) findViewById(R.id.archive_btn);
-        archive.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent startMain = new Intent(MainActivity.this, ArchiveActivity.class);
-                MainActivity.this.startActivity(startMain);
-            }
-        });
+        archive.setEnabled(false);
+
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -100,10 +90,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-        } else
+        } else {
             super.onActivityResult(requestCode, resultCode, data);
+        }
 
     }
-
-
 }

@@ -12,7 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiHelper {
 
-    private final static String BASE_URL = "http://95.220.130.189:8080";
+    private final static String BASE_URL = "http://zav.texnoprom.com:8080";
 
     private Retrofit retrofit;
     private ApiHelperInterface apiInterface;
