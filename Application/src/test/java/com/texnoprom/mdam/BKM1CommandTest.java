@@ -1,6 +1,6 @@
 package com.texnoprom.mdam;
 
-import com.texnoprom.mdam.activities.Modbus;
+import com.texnoprom.mdam.utils.Modbus;
 
 import org.junit.Test;
 

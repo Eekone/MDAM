@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.texnoprom.mdam.R;
-import com.texnoprom.mdam.adapters.RecyclerDataAdapter2;
+import com.texnoprom.mdam.adapters.RecyclerDataAdapter;
 import com.texnoprom.mdam.models.CustomData;
 import com.texnoprom.mdam.models.ExpandableRowData;
 import com.texnoprom.mdam.models.ExpandingRow;
@@ -88,7 +88,7 @@ public class TCTFragment extends Fragment implements SwipeRefreshLayout.OnRefres
     }
 
     private void setAdapter(ArrayList<ExpandingRow> data) {
-        RecyclerDataAdapter2 recyclerDataAdapter = new RecyclerDataAdapter2(data, getActivity());
+        RecyclerDataAdapter recyclerDataAdapter = new RecyclerDataAdapter(data, getActivity());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setAdapter(recyclerDataAdapter);
         mRecyclerView.setHasFixedSize(true);

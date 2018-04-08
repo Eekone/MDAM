@@ -4,6 +4,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -29,7 +31,7 @@ import com.texnoprom.mdam.fragments.TCPFragment;
 import com.texnoprom.mdam.models.Register;
 import com.texnoprom.mdam.models.RegisterBatch;
 import com.texnoprom.mdam.models.RegisterInfo;
-import com.texnoprom.mdam.services.JSONHelper;
+import com.texnoprom.mdam.services.ApiHelper;
 import com.zgkxzx.modbus4And.requset.ModbusParam;
 import com.zgkxzx.modbus4And.requset.ModbusReq;
 import com.zgkxzx.modbus4And.requset.OnRequestBack;
@@ -37,6 +39,7 @@ import com.zgkxzx.modbus4And.requset.OnRequestBack;
 import java.util.regex.Pattern;
 
 import okhttp3.MediaType;
+import retrofit2.Callback;
 
 
 public class TCPActivity extends AppCompatActivity {
@@ -46,6 +49,7 @@ public class TCPActivity extends AppCompatActivity {
     private String deviceName = "";
     private int deviceNumber;
     ModbusParam mModbusParam = new ModbusParam();
+    private ApiHelper apiHelper = new ApiHelper();
 
     public static final MediaType MEDIA_TYPE =
             MediaType.parse("application/json");
@@ -253,12 +257,37 @@ public class TCPActivity extends AppCompatActivity {
                 registerBatch.getRegisters().add(reg);
             }
         }
+        apiHelper.postRegisters(registerBatch, postRegistersCallback);
 
-        JSONHelper.sendBatch("http://95.220.137.189/post", registerBatch, this);
         // localDB.save(registerBatch);
-
     }
 
+    private Callback<Boolean> postRegistersCallback = new Callback<Boolean>() {
+        @Override
+        public void onResponse(retrofit2.Call<Boolean> call, retrofit2.Response<Boolean> response) {
+            switch (response.code()) {
+                case 201:
+                    Toast.makeText(TCPActivity.this, "Успешно загружено", Toast.LENGTH_SHORT).show();
+                    break;
+                case 409:
+                    Toast.makeText(TCPActivity.this, "Регистры уже были загружены", Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    Toast.makeText(TCPActivity.this, "Ошибка", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onFailure(retrofit2.Call<Boolean> call, Throwable t) {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+
+                    Toast.makeText(TCPActivity.this, "Нет ответа", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    };
 
     private void modbusInit() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -280,10 +309,9 @@ public class TCPActivity extends AppCompatActivity {
                         for (TCPFragment fr : mMMPRFragmentsAdapter.fragmentsList) {
                             fr.fetchData();
                         }
-
                     }
                 });
-                Log.e("MMPR:", "Подклю!чено" + s);
+                Log.e("MMPR:", "Подключено" + s);
             }
 
             @Override

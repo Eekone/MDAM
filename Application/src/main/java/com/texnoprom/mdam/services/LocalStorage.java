@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.Environment;
 import android.widget.Toast;
 
-import com.texnoprom.mdam.activities.Modbus;
 import com.texnoprom.mdam.models.RegisterBatch;
+import com.texnoprom.mdam.utils.Modbus;
 
 import java.io.File;
 import java.io.FileWriter;

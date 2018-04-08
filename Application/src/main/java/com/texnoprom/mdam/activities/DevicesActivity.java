@@ -52,21 +52,20 @@ public class DevicesActivity extends AppCompatActivity {
                 Intent startMain = new Intent(DevicesActivity.this, BTActivity.class);
                 startMain.putExtra("deviceType", "БКМ1");
                 DevicesActivity.this.startActivity(startMain);
-                finish();
             }
         });
 
         Button BKM4 = (Button) findViewById(R.id.BKM4);
-        BKM4.setOnClickListener(new View.OnClickListener() {
+        BKM4.setEnabled(false);
+        /*BKM4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent startMain = new Intent(DevicesActivity.this, BTActivity.class);
                 startMain.putExtra("deviceType", "БКМ4");
                 DevicesActivity.this.startActivity(startMain);
-                finish();
-            }
-        });
 
+            }
+        });*/
 
         Button MMPR = (Button) findViewById(R.id.MMPR);
         MMPR.setOnClickListener(new View.OnClickListener() {
@@ -75,7 +74,6 @@ public class DevicesActivity extends AppCompatActivity {
                 Intent startMain = new Intent(DevicesActivity.this, TCPActivity.class);
                 startMain.putExtra("deviceType", "ММПР");
                 DevicesActivity.this.startActivity(startMain);
-                finish();
             }
         });
     }

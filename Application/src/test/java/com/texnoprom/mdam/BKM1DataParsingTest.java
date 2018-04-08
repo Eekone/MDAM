@@ -7,7 +7,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.texnoprom.mdam.activities.Modbus;
+import com.texnoprom.mdam.utils.Modbus;
 import com.texnoprom.mdam.models.RegisterBatch;
 import com.texnoprom.mdam.models.RegisterInfo;
 

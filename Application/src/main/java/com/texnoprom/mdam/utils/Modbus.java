@@ -1,4 +1,4 @@
-package com.texnoprom.mdam.activities;
+package com.texnoprom.mdam.utils;
 
 
 import com.texnoprom.mdam.models.Register;

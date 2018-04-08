@@ -2,6 +2,7 @@ package com.texnoprom.mdam.services;
 
 import com.texnoprom.mdam.models.CustomData;
 import com.texnoprom.mdam.models.ParameterType;
+import com.texnoprom.mdam.models.RegisterBatch;
 
 import java.util.List;
 
@@ -34,6 +35,10 @@ public class ApiHelper {
     public void getCustomData(Callback<List<CustomData>> callback) {
         Call<List<CustomData>> call = apiInterface.getCustomData();
         call.enqueue(callback);
+    }
+
+    public void postRegisters(RegisterBatch registerBatch, Callback<Boolean> callback) {
+        apiInterface.postRegisters(registerBatch).enqueue(callback);
     }
 
 }

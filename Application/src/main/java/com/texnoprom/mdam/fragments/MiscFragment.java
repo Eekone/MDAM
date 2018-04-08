@@ -16,9 +16,9 @@ import android.widget.ListView;
 
 import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.activities.BTActivity;
-import com.texnoprom.mdam.activities.Modbus;
 import com.texnoprom.mdam.adapters.RegisterAdapter;
 import com.texnoprom.mdam.models.RegisterBatch;
+import com.texnoprom.mdam.utils.Modbus;
 
 
 public class MiscFragment extends Fragment {

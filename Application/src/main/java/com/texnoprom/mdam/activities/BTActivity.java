@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -33,11 +35,14 @@ import com.texnoprom.mdam.fragments.CalibrationsFragment;
 import com.texnoprom.mdam.fragments.ConfigFragment;
 import com.texnoprom.mdam.fragments.MiscFragment;
 import com.texnoprom.mdam.fragments.ValuesFragment;
+import com.texnoprom.mdam.models.RegisterBatch;
 import com.texnoprom.mdam.models.RegisterInfo;
-import com.texnoprom.mdam.services.LocalStorage;
+import com.texnoprom.mdam.services.ApiHelper;
+import com.texnoprom.mdam.utils.Modbus;
 
 import app.akexorcist.bluetotohspp.library.BluetoothSPP;
 import app.akexorcist.bluetotohspp.library.BluetoothState;
+import retrofit2.Callback;
 
 public class BTActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -47,6 +52,8 @@ public class BTActivity extends AppCompatActivity
     LinearLayout header;
     Menu menuNav;
     String deviceType, userName, currentFragment;
+
+    ApiHelper apiHelper = new ApiHelper();
     boolean gonnaBeSaved = false;
 
     public void sen(byte[] data) {
@@ -262,7 +269,8 @@ public class BTActivity extends AppCompatActivity
         bt.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
             public void onDataReceived(byte[] data, String message) {
                 if (gonnaBeSaved) {
-                    LocalStorage.saveData(data, getApplicationContext());
+                    RegisterBatch registerBatch = Modbus.RegistersFromData(data, deviceType, 0);
+                    apiHelper.postRegisters(registerBatch, postRegistersCallback);
                     gonnaBeSaved = false;
                 } else {
                     FragmentManager fm = getSupportFragmentManager();
@@ -302,4 +310,31 @@ public class BTActivity extends AppCompatActivity
             }
         }
     }
+
+    private Callback<Boolean> postRegistersCallback = new Callback<Boolean>() {
+        @Override
+        public void onResponse(retrofit2.Call<Boolean> call, retrofit2.Response<Boolean> response) {
+            switch (response.code()) {
+                case 201:
+                    Toast.makeText(BTActivity.this, "Успешно загружено", Toast.LENGTH_SHORT).show();
+                    break;
+                case 409:
+                    Toast.makeText(BTActivity.this, "Регистры уже были загружены", Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    Toast.makeText(BTActivity.this, "Ошибка", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onFailure(retrofit2.Call<Boolean> call, Throwable t) {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+
+                    Toast.makeText(BTActivity.this, "Нет ответа", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    };
 }
