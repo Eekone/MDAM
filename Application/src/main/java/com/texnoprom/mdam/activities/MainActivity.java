@@ -84,6 +84,11 @@ public class MainActivity extends AppCompatActivity {
                         MainActivity.this.startActivity(startMain);
                         break;
                     }
+                    case "ММПР":
+                        Intent startMain = new Intent(MainActivity.this, TCPActivity.class);
+                        startMain.putExtra("deviceType", result.getContents());
+                        MainActivity.this.startActivity(startMain);
+                        break;
                     default:
                         Toast.makeText(this, "Устройство не найдено", Toast.LENGTH_LONG).show();
                         break;

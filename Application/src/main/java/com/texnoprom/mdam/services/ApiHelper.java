@@ -1,5 +1,7 @@
 package com.texnoprom.mdam.services;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.texnoprom.mdam.models.CustomData;
 import com.texnoprom.mdam.models.ParameterType;
 import com.texnoprom.mdam.models.RegisterBatch;
@@ -19,9 +21,13 @@ public class ApiHelper {
     private ApiHelperInterface apiInterface;
 
     public ApiHelper() {
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+
         retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
         apiInterface = retrofit.create(ApiHelperInterface.class);
