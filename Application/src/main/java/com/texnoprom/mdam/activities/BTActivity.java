@@ -273,6 +273,9 @@ public class BTActivity extends AppCompatActivity
                     apiHelper.postRegisters(registerBatch, postRegistersCallback);
                     gonnaBeSaved = false;
                 } else {
+                    if (currentFragment == null) {
+                        return;
+                    }
                     FragmentManager fm = getSupportFragmentManager();
                     switch (currentFragment) {
                         case "values":
