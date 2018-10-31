@@ -126,6 +126,9 @@ public class BTActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.nav_measure:
+                byte[] MEASURE;
+                MEASURE = new byte[]{1, 5, 0, 5, -1, 0, (byte) 156, (byte) 59};
+
                 bt.send(Modbus.MEASURE);
                 break;
             default:

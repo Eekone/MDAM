@@ -14,14 +14,14 @@ import java.util.Locale;
 
 //ToDo: Implement/use trird-party Modbus library instead of hardcoded commands
 public class Modbus {
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.getDefault());
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.getDefault()); //private
 
-    public static byte[] MEASURE = {1, 5, 0, 5, -1, 0, (byte) 156, 59};
-    public static byte[] VALUES = {1, 3, 0, 0, 0, 10, (byte) 197, (byte) 205};
-    public static byte[] CONFIG = {1, 3, 0, 10, 0, 5, (byte) 165, (byte) 203};
-    public static byte[] ALL = {1, 3, 0, 0, 0, 41, (byte) 132, 20};
-    public static byte[] CALIBRATIONS = {1, 3, 0, 15, 0, 15, (byte) 53, (byte) 205};
-    public static byte[] MISC = {1, 3, 0, 30, 0, 11, (byte) 100, 11};
+    public static final byte[] MEASURE = {1, 5, 0, 5, -1, 0, (byte) 156, (byte) 59}; // Команда 5 измерить
+    public static byte[] ALL = {1, 3, 0, 0, 0, 60, (byte) 69, (byte) 219}; // Группа аналоговые регистры
+    public static byte[] VALUES = {1, 3, 0, 0, 0, 27, (byte) 5, (byte) 193}; //Группа измеряемые параметры
+    public static byte[] CALIBRATIONS = {1, 3, 0, 31, 0, 16, (byte) 117, (byte) 192}; // Группа калибровки
+    public static byte[] CONFIG = {1, 3, 0, 27, 0, 4, (byte) 52, (byte) 14}; // Группа режимы работы
+    public static byte[] MISC = {1, 3, 0, 47, 0, 13, (byte) 181, (byte) 198};
 
     public static byte[] presetRegister(int slaveAddress, int registerAddress, int value) {
         byte[] command = new byte[8];

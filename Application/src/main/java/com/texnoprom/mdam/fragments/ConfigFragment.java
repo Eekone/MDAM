@@ -52,7 +52,7 @@ public class ConfigFragment extends Fragment {
     public void handleInputData(byte[] data, String deviceType) {
         if (data[1] == 3) {
             srl.setRefreshing(false);
-            registerBatch = Modbus.RegistersFromData(data, deviceType, 10);
+            registerBatch = Modbus.RegistersFromData(data, deviceType, 27);
             RegisterAdapter adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
             listView.setAdapter(adapter);
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

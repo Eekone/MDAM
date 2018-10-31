@@ -15,7 +15,7 @@
     <string name="Measure">Провести измерение</string>
     <string name="Values">Значения</string>
     <string name="Config">Конфигурация</string>
-    <string name="Calibration">Калибровка</string>
+    <string name="Calibration">Калибровки</string>
     <string name="Misc">Прочее</string>
     <string name="title_activity_login">Авторизация</string>
 
@@ -37,92 +37,121 @@
 
     <!-- BRegisterster Titles -->
     <string-array name="BKM1_3_titles">
-        <item>Потенциал</item>
-        <item>Поляризационный потенциал</item>
-        <item>Кислотность грунта</item>
-        <item>Ток в трубопроводе</item>
-        <item>Скорость коррозии 1</item>
-        <item>Скорость коррозии 2</item>
-        <item>Скорость коррозии 3</item>
-        <item>Температура корпуса</item>
-        <item>Напряжение батареи питания</item>
-        <item>Сопротивление датчика вскрытия</item>
-        <item>Адрес устройства</item>
-        <item>Скорость обмена</item>
-        <item>Тип устройства связи</item>
-        <item>Адрес ведомого сбора данных</item>
-        <item>Адрес блока контроля коррозии</item>
-        <item>Нулевое значение потенциала</item>
-        <item>Калибровочное значение потенциала</item>
-        <item>Максимальное значение потенциала</item>
-        <item>Нулевое значение поляризационного потенциала</item>
-        <item>Калибровочное значение поляризационного потенциала</item>
-        <item>Максимальное значение поляризационного потенциала</item>
-        <item>Нулевое значение кислотности грунта</item>
-        <item>Калибровочное значение кислотности грунта</item>
-        <item>Максимальное значение кислотности грунта</item>
-        <item>Нулевое значение тока в трубопроводе</item>
-        <item>Калибровочное значение тока в трубопроводе</item>
-        <item>Максимальное значение тока в трубопроводе</item>
-        <item>Нулевое значение сопротивления датчиков коррозии</item>
-        <item>Калибровочное значение сопротивления датчиков коррозии</item>
-        <item>Максимальное значение сопротивления датчиков коррозии</item>
-        <item>Период передачи данных</item>
-        <item>Номер начального регистра у ведомого</item>
-        <item>Регистр 32H</item>
-        <item>Регистр 33H</item>
-        <item>Регистр 34H</item>
-        <item>Регистр 35H</item>
+        // аналоговые
+        <item>Полный потенциал V</item>
+        <item>Поляризационный потенциал V</item>
+        <item>Кислотность pH </item>
+        <item>Ток A</item>
+        <item>Температура ℃</item>
+        <item>Напряжение батареи V</item>
+        <item>Напряжение резисторов V</item>
+        <item>Напряжение питания V</item>
+        // дискретные и время
+        <item>Слово состояния</item>
         <item>Год</item>
         <item>Месяц</item>
         <item>День</item>
         <item>Час</item>
-        <item>Время работы</item>
+        <item>Минута</item>
+        <item>Секунда</item>
+        // резисторы
+        <item>Сопротивление 1</item>
+        <item>Сопротивление 2</item>
+        <item>Сопротивление 3</item>
+        <item>Сопротивление 5</item>
+        <item>Сопротивление 4</item>
+        <item>Сопротивление 6</item>
+        <item>Сопротивление 7</item>
+        <item>Сопротивление 8</item>
+        <item>Сопротивление 9</item>
+        <item>Сопротивление 10</item>
+        <item>Сопротивление 11</item>
+        <item>Сопротивление 12</item>
+        // сетевые данные учёта
+        <item>Адрес MODBUS</item>
+        <item>Скорость RS-485</item>
+        <item>ID</item>
+        <item>Версия программы</item>
+        // калибровки
+        <item>Смещение полного потенциала</item>
+        <item>Коэффициент полного потенциала</item>
+        <item>Максимум полного потенциала</item>
+        <item>Смещение поляризационного потенциала</item>
+        <item>Коэффициент поляризационного потенциала</item>
+        <item>Максимум поляризационного потенциала</item>
+        <item>Смещение кислотности</item>
+        <item>Коэффициент  кислотности</item>
+        <item>Максимум кислотности</item>
+        <item>Смещение тока</item>
+        <item>Коэффициент тока</item>
+        <item>Максимум тока</item>
+        <item>Смещение сопротивлений</item>
+        <item>Авария резистора есле значение больше</item>
+        <item>авария резистора есле значение меньше</item>
+        <item>Количество замеров за опрос</item>
+        // Режимы работы
+        <item>Наличие и тип устройства связи</item>
+        <item>Период опроса (минуты)</item>
+        <item>Время активности (секунды)</item>
+        <item>Адрес системы сбора данных</item>
+        <item>Адрес УСИКПСТ (0-нет)</item>
+        <item>Начало смещения сбора данных</item>
+        <item>Данные из датчика коррозии 1</item>
+        <item>Данные из датчика коррозии 2</item>
+        <item>Данные из датчика коррозии 3</item>
+        <item>Данные из датчика коррозии 4</item>
+        <item>Оператор +7ХХХХХХХХХХХ</item>
+        <item>Телефон часть 1</item>
+        <item>Телефон часть 2</item>
     </string-array>
 
     <!-- BRegisterster Units -->
     <string-array name="BKM1_units">
+        // аналоговые
         <item>В</item>
         <item>В</item>
         <item>В</item>
         <item>А</item>
-        <item>Ом</item>
-        <item>Ом</item>
-        <item>Ом</item>
-        <item>C</item>
+        <item>℃</item>
         <item>В</item>
-        <item>Ом</item>
-        <item> </item>
-        <item>кбит/с</item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item>мин</item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
-        <item> </item>
+        <item>В</item>
+        <item>В</item>
+        // дискретные и время
         <item> </item>
         <item>г</item>
         <item>мес</item>
         <item>д</item>
-        <item>ч</item>
-        <item>с</item>
+        <item>час</item>
+        <item>мин</item>
+        <item>сек</item>
+        // резисторы
+        <item>Ом</item>
+        <item>Ом</item>
+        <item>Ом</item>
+        <item>Ом</item>
+        <item>Ом</item>
+        <item>Ом</item>
+        <item>Ом</item>
+        <item>Ом</item>
+        <item>Ом</item>
+        <item>Ом</item>
+        <item>Ом</item>
+        <item>Ом</item>
+        // сетевые данные учёта
+        <item> </item>
+        <item>кбод/сек</item>
+        <item> </item>
+        <item> </item>
+        <item> </item>
+        <item> </item>
+        <item> </item>
+        <item> </item>
+        <item> </item>
+        <item> </item>
+        <item> </item>
+        <item> </item>
+        <item> </item>
+        <item> </item>
     </string-array>
 
     <!-- Registerster Titles -->

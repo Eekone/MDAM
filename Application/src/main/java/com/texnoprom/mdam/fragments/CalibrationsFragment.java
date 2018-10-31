@@ -55,7 +55,7 @@ public class CalibrationsFragment extends Fragment {
     public void handleInputData(byte[] data, String deviceType) {
         if (data[1] == 3) {
             srl.setRefreshing(false);
-            registerBatch = Modbus.RegistersFromData(data, deviceType, 15);
+            registerBatch = Modbus.RegistersFromData(data, deviceType, 31);
             RegisterAdapter adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
             listView.setAdapter(adapter);
             listView.setSelectionFromTop(position, top);

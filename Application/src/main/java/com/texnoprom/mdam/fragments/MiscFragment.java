@@ -55,7 +55,7 @@ public class MiscFragment extends Fragment {
     public void handleInputData(byte[] data, String deviceType) {
         if (data[1] == 3) {
             srl.setRefreshing(false);
-            registerBatch = Modbus.RegistersFromData(data, deviceType, 30);
+            registerBatch = Modbus.RegistersFromData(data, deviceType, 47);
             RegisterAdapter adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
             listView.setAdapter(adapter);
             listView.setSelectionFromTop(position, top);
