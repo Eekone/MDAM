@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.activities.BTActivity;
@@ -70,9 +71,18 @@ public class MiscFragment extends Fragment {
                     builder.setPositiveButton("Ввод", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            ((BTActivity) getActivity()).sen(Modbus.presetRegister(1,
-                                    registerBatch.getRegisters().get(0).getNumber() + arg2,
-                                    Integer.valueOf(input.getText().toString())));
+                            String raw = input.getText().toString().trim();
+                            if (raw.length() == 0) {
+                                Toast.makeText(getActivity(), "Введите число", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            try {
+                                ((BTActivity) getActivity()).sen(Modbus.presetRegister(1,
+                                        registerBatch.getRegisters().get(0).getNumber() + arg2,
+                                        Integer.parseInt(raw)));
+                            } catch (NumberFormatException e) {
+                                Toast.makeText(getActivity(), "Введите число", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     });
                     builder.setNegativeButton("Назад", new DialogInterface.OnClickListener() {

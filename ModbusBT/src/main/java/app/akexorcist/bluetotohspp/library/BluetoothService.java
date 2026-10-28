@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 
@@ -38,6 +39,8 @@ public class BluetoothService {
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
+    private final HandlerThread mWriterThread;
+    private final Handler mWriter;
 
     // Constructor. Prepares a new BluetoothChat session
     // context : The UI Activity Context
@@ -46,6 +49,9 @@ public class BluetoothService {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = BluetoothState.STATE_NONE;
         mHandler = handler;
+        mWriterThread = new HandlerThread("bt-writer");
+        mWriterThread.start();
+        mWriter = new Handler(mWriterThread.getLooper());
     }
 
     public static byte[] ModRTU_CRC(byte[] buf) {
@@ -197,15 +203,46 @@ public class BluetoothService {
     // Write to the ConnectedThread in an unsynchronized manner
     // out : The bytes to write
     public void write(byte[] out) {
-        // Create temporary object
-        ConnectedThread r;
-        // Synchronize a copy of the ConnectedThread
+        final ConnectedThread r;
         synchronized (this) {
             if (mState != BluetoothState.STATE_CONNECTED) return;
             r = mConnectedThread;
         }
-        // Perform the write unsynchronized
-        r.write(out);
+        if (r == null || out == null) return;
+        final byte[] copy = Arrays.copyOf(out, out.length);
+        mWriter.post(new WriteRequest(r, copy, this));
+    }
+
+    private static final class WriteRequest implements Runnable {
+        private final ConnectedThread thread;
+        private final byte[] data;
+        private final BluetoothService service;
+
+        WriteRequest(ConnectedThread thread, byte[] data, BluetoothService service) {
+            this.thread = thread;
+            this.data = data;
+            this.service = service;
+        }
+
+        @Override
+        public void run() {
+            try {
+                thread.write(data);
+            } catch (Throwable t) {
+                service.showToast("Не удалось отправить команду");
+            }
+        }
+    }
+
+    private void showToast(String text) {
+        if (text == null || text.length() == 0) {
+            text = "Ошибка Bluetooth";
+        }
+        Message msg = mHandler.obtainMessage(BluetoothState.MESSAGE_TOAST);
+        Bundle bundle = new Bundle();
+        bundle.putString(BluetoothState.TOAST, text);
+        msg.setData(bundle);
+        mHandler.sendMessage(msg);
     }
 
     // Indicate that the connection attempt failed and notify the UI Activity
@@ -216,8 +253,15 @@ public class BluetoothService {
 
     // Indicate that the connection was lost and notify the UI Activity
     private void connectionLost() {
-        // Start the service over to restart listening mode
-        BluetoothService.this.start();
+        ConnectedThread dead;
+        synchronized (this) {
+            dead = mConnectedThread;
+            mConnectedThread = null;
+        }
+        if (dead != null && Thread.currentThread() != dead) {
+            dead.cancel();
+        }
+        setState(BluetoothState.STATE_NONE);
     }
 
     // This thread runs while listening for incoming connections. It behaves
@@ -235,13 +279,16 @@ public class BluetoothService {
             // Create a new listening server socket
             try {
                 tmp = mAdapter.listenUsingRfcommWithServiceRecord(NAME_SECURE, UUID_OTHER_DEVICE);
-            } catch (IOException e) {
+            } catch (Exception e) {
             }
             mmServerSocket = tmp;
         }
 
         public void run() {
             setName("AcceptThread" + mSocketType);
+            if (mmServerSocket == null) {
+                return;
+            }
             BluetoothSocket socket = null;
 
             // Listen to the server socket if we're not connected
@@ -250,7 +297,7 @@ public class BluetoothService {
                     // This is a blocking call and will only return on a
                     // successful connection or an exception
                     socket = mmServerSocket.accept();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     break;
                 }
 
@@ -280,9 +327,11 @@ public class BluetoothService {
 
         public void cancel() {
             try {
-                mmServerSocket.close();
-                mmServerSocket = null;
-            } catch (IOException e) {
+                if (mmServerSocket != null) {
+                    mmServerSocket.close();
+                    mmServerSocket = null;
+                }
+            } catch (Exception e) {
             }
         }
 
@@ -354,6 +403,7 @@ public class BluetoothService {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
+        private volatile boolean closed = false;
 
         public ConnectedThread(BluetoothSocket socket, String socketType) {
             mmSocket = socket;
@@ -374,62 +424,70 @@ public class BluetoothService {
         public void run() {
             byte[] buffer;
             ArrayList<Integer> arr_byte = new ArrayList<Integer>();
-            //Keep listening to the InputStream while connected
-            while (true) {
+            while (!isInterrupted()) {
                 try {
-                    while (mmInStream.available() > 0) {
-                        int data = mmInStream.read();
-                        arr_byte.add(data);
-                        if (arr_byte.size() > 2) {
-                            byte bData[] = new byte[arr_byte.size() - 2];
-                            for (int k = 0; k < arr_byte.size() - 2; k++)
-                                bData[k] = arr_byte.get(k).byteValue();
+                    if (mmInStream == null) {
+                        throw new IOException("Нет входного потока Bluetooth");
+                    }
+                    int data = mmInStream.read();
+                    if (data < 0) {
+                        throw new IOException("Соединение закрыто");
+                    }
+                    arr_byte.add(data);
+                    if (arr_byte.size() > 256) {
+                        arr_byte.remove(0);
+                    }
+                    if (arr_byte.size() > 2) {
+                        byte bData[] = new byte[arr_byte.size() - 2];
+                        for (int k = 0; k < arr_byte.size() - 2; k++)
+                            bData[k] = arr_byte.get(k).byteValue();
 
-                            byte crc[] = ModRTU_CRC(bData);
-                            byte dCrc[] = new byte[]{arr_byte.get(arr_byte.size() - 2).byteValue(),
-                                    arr_byte.get(arr_byte.size() - 1).byteValue()};
+                        byte crc[] = ModRTU_CRC(bData);
+                        byte dCrc[] = new byte[]{arr_byte.get(arr_byte.size() - 2).byteValue(),
+                                arr_byte.get(arr_byte.size() - 1).byteValue()};
 
-                            if (Arrays.equals(crc, dCrc)) {
-                                buffer = new byte[arr_byte.size()];
-                                for (int i = 0; i < arr_byte.size(); i++) {
-                                    buffer[i] = arr_byte.get(i).byteValue();
-                                }
-                                // Send the obtained bytes to the UI Activity
-                                mHandler.obtainMessage(BluetoothState.MESSAGE_READ
-                                        , buffer.length, -1, buffer).sendToTarget();
-                                arr_byte = new ArrayList<Integer>();
+                        if (Arrays.equals(crc, dCrc)) {
+                            buffer = new byte[arr_byte.size()];
+                            for (int i = 0; i < arr_byte.size(); i++) {
+                                buffer[i] = arr_byte.get(i).byteValue();
                             }
+                            mHandler.obtainMessage(BluetoothState.MESSAGE_READ
+                                    , buffer.length, -1, buffer).sendToTarget();
+                            arr_byte = new ArrayList<Integer>();
                         }
                     }
-                } catch (IOException e) {
-                    connectionLost();
-                    // Start the service over to restart listening mode
-                    BluetoothService.this.start();
+                } catch (Throwable e) {
+                    if (!closed && !isInterrupted()) {
+                        showToast("Связь с устройством прервана");
+                        connectionLost();
+                    }
                     break;
                 }
             }
         }
 
-        // Write to the connected OutStream.
-        // @param buffer  The bytes to write
         public void write(byte[] buffer) {
-            try {/*
-                byte[] buffer2 = new byte[buffer.length + 2];
-                for(int i = 0 ; i < buffer.length ; i++)
-                    buffer2[i] = buffer[i];
-                buffer2[buffer2.length - 2] = 0x0A;
-                buffer2[buffer2.length - 1] = 0x0D;*/
+            if (mmOutStream == null) {
+                showToast("Нет выходного потока Bluetooth");
+                return;
+            }
+            try {
                 mmOutStream.write(buffer);
-                // Share the sent message back to the UI Activity
                 mHandler.obtainMessage(BluetoothState.MESSAGE_WRITE
                         , -1, -1, buffer).sendToTarget();
             } catch (IOException e) {
+                showToast("Не удалось отправить команду");
+            } catch (RuntimeException e) {
+                showToast("Не удалось отправить команду");
             }
         }
 
         public void cancel() {
+            closed = true;
             try {
-                mmSocket.close();
+                if (mmSocket != null) {
+                    mmSocket.close();
+                }
             } catch (IOException e) {
             }
         }
