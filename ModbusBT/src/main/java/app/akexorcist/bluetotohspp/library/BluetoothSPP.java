@@ -52,10 +52,13 @@ public class BluetoothSPP {
                     break;
                 case BluetoothState.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
-                    String readMessage = new String(readBuf);
-                    if (readBuf != null && readBuf.length > 0) {
-                        if (mDataReceivedListener != null)
-                            mDataReceivedListener.onDataReceived(readBuf, readMessage);
+                    try {
+                        if (readBuf != null && readBuf.length > 0 && mDataReceivedListener != null) {
+                            mDataReceivedListener.onDataReceived(readBuf, new String(readBuf));
+                        }
+                    } catch (RuntimeException e) {
+                        Toast.makeText(mContext, "Не удалось обработать ответ устройства",
+                                Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case BluetoothState.MESSAGE_DEVICE_NAME:
@@ -66,8 +69,11 @@ public class BluetoothSPP {
                     isConnected = true;
                     break;
                 case BluetoothState.MESSAGE_TOAST:
-                    Toast.makeText(mContext, msg.getData().getString(BluetoothState.TOAST)
-                            , Toast.LENGTH_SHORT).show();
+                    String toast = msg.getData().getString(BluetoothState.TOAST);
+                    if (toast == null || toast.length() == 0) {
+                        toast = "Ошибка Bluetooth";
+                    }
+                    Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
                     break;
                 case BluetoothState.MESSAGE_STATE_CHANGE:
                     if (mBluetoothStateListener != null)

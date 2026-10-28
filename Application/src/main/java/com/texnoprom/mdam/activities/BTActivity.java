@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -70,6 +71,13 @@ public class BTActivity extends AppCompatActivity
 
         ActivityCompat.requestPermissions(BTActivity.this,
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        if (Build.VERSION.SDK_INT >= 31) {
+            ActivityCompat.requestPermissions(BTActivity.this,
+                    new String[]{
+                            "android.permission.BLUETOOTH_CONNECT",
+                            "android.permission.BLUETOOTH_SCAN"
+                    }, 2);
+        }
         setContentView(com.texnoprom.mdam.R.layout.activity_bluetooth);
         RegisterInfo.setContext(getApplicationContext());
         setupUI();
