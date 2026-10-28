@@ -132,15 +132,22 @@ public class BTActivity extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.nav_measure:
-                bt.send(Modbus.MEASURE);
-                break;
-            default:
-                displaySelectedScreen(item.getItemId());
-                break;
+        try {
+            switch (item.getItemId()) {
+                case R.id.nav_measure:
+                    bt.send(Modbus.MEASURE);
+                    break;
+                default:
+                    displaySelectedScreen(item.getItemId());
+                    break;
+            }
+            if (drawer != null) {
+                drawer.closeDrawer(GravityCompat.START);
+            }
+        } catch (Throwable e) {
+            Toast.makeText(this, "Команда не выполнена: " + e.getClass().getSimpleName(),
+                    Toast.LENGTH_LONG).show();
         }
-        drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
@@ -168,6 +175,14 @@ public class BTActivity extends AppCompatActivity
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void setMenuGroupEnabled(boolean enabled) {
+        if (menuNav == null) return;
+        try {
+            menuNav.setGroupEnabled(R.id.nav_functions, enabled);
+        } catch (Throwable ignored) {
         }
     }
 
@@ -256,21 +271,21 @@ public class BTActivity extends AppCompatActivity
                 connectedTo.setVisibility(View.VISIBLE);
                 device.setText("Подключить");
                 status.setText("Нет подключения");
-                menuNav.setGroupEnabled(R.id.nav_functions, false);
+                setMenuGroupEnabled(false);
             }
 
             public void onDeviceConnectionFailed() {
                 connectedTo.setVisibility(View.VISIBLE);
                 device.setText("Подключить");
                 status.setText("Не удалось подключиться");
-                menuNav.setGroupEnabled(R.id.nav_functions, false);
+                setMenuGroupEnabled(false);
             }
 
             public void onDeviceConnected(String name, String address) {
                 connectedTo.setVisibility(View.GONE);
                 device.setText(name);
                 status.setText("Подключено");
-                menuNav.setGroupEnabled(R.id.nav_functions, true);
+                setMenuGroupEnabled(true);
             }
         });
         //Обработчик принятных данных
@@ -285,22 +300,22 @@ public class BTActivity extends AppCompatActivity
                         return;
                     }
                     FragmentManager fm = getSupportFragmentManager();
+                    Fragment found = fm.findFragmentByTag(currentFragment);
+                    if (found == null || data == null || data.length < 2) {
+                        return;
+                    }
                     switch (currentFragment) {
                         case "values":
-                            ValuesFragment vf = (ValuesFragment) fm.findFragmentByTag(currentFragment);
-                            vf.handleInputData(data, deviceType);
+                            ((ValuesFragment) found).handleInputData(data, deviceType);
                             break;
                         case "config":
-                            ConfigFragment cf = (ConfigFragment) fm.findFragmentByTag(currentFragment);
-                            cf.handleInputData(data, deviceType);
+                            ((ConfigFragment) found).handleInputData(data, deviceType);
                             break;
                         case "calibration":
-                            CalibrationsFragment clf = (CalibrationsFragment) fm.findFragmentByTag(currentFragment);
-                            clf.handleInputData(data, deviceType);
+                            ((CalibrationsFragment) found).handleInputData(data, deviceType);
                             break;
                         case "misc":
-                            MiscFragment mf = (MiscFragment) fm.findFragmentByTag(currentFragment);
-                            mf.handleInputData(data, deviceType);
+                            ((MiscFragment) found).handleInputData(data, deviceType);
                             break;
                     }
                 }

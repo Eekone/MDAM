@@ -47,6 +47,7 @@ public class BluetoothSPP {
     @SuppressLint("HandlerLeak")
     private final Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
+            try {
             switch (msg.what) {
                 case BluetoothState.MESSAGE_WRITE:
                     break;
@@ -100,6 +101,10 @@ public class BluetoothSPP {
                         isConnecting = false;
                     }
                     break;
+            }
+            } catch (Throwable e) {
+                Toast.makeText(mContext, "Сбой: " + e.getClass().getSimpleName(),
+                        Toast.LENGTH_LONG).show();
             }
         }
     };
@@ -234,8 +239,13 @@ public class BluetoothSPP {
     }
 
     public void send(byte[] data) {
-        if (mChatService.getState() == BluetoothState.STATE_CONNECTED) {
-            mChatService.write(data);
+        if (data == null || mChatService == null) return;
+        try {
+            if (mChatService.getState() == BluetoothState.STATE_CONNECTED) {
+                mChatService.write(data);
+            }
+        } catch (RuntimeException e) {
+            Toast.makeText(mContext, "Не удалось отправить команду", Toast.LENGTH_SHORT).show();
         }
     }
 

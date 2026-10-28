@@ -210,7 +210,11 @@ public class BluetoothService {
         mWriter.execute(new Runnable() {
             @Override
             public void run() {
-                r.write(copy);
+                try {
+                    r.write(copy);
+                } catch (Throwable t) {
+                    showToast("Не удалось отправить команду");
+                }
             }
         });
     }
@@ -234,8 +238,15 @@ public class BluetoothService {
 
     // Indicate that the connection was lost and notify the UI Activity
     private void connectionLost() {
-        // Start the service over to restart listening mode
-        BluetoothService.this.start();
+        ConnectedThread dead;
+        synchronized (this) {
+            dead = mConnectedThread;
+            mConnectedThread = null;
+        }
+        if (dead != null && Thread.currentThread() != dead) {
+            dead.cancel();
+        }
+        setState(BluetoothState.STATE_NONE);
     }
 
     // This thread runs while listening for incoming connections. It behaves
@@ -253,13 +264,16 @@ public class BluetoothService {
             // Create a new listening server socket
             try {
                 tmp = mAdapter.listenUsingRfcommWithServiceRecord(NAME_SECURE, UUID_OTHER_DEVICE);
-            } catch (IOException e) {
+            } catch (Exception e) {
             }
             mmServerSocket = tmp;
         }
 
         public void run() {
             setName("AcceptThread" + mSocketType);
+            if (mmServerSocket == null) {
+                return;
+            }
             BluetoothSocket socket = null;
 
             // Listen to the server socket if we're not connected
@@ -268,7 +282,7 @@ public class BluetoothService {
                     // This is a blocking call and will only return on a
                     // successful connection or an exception
                     socket = mmServerSocket.accept();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     break;
                 }
 
@@ -298,9 +312,11 @@ public class BluetoothService {
 
         public void cancel() {
             try {
-                mmServerSocket.close();
-                mmServerSocket = null;
-            } catch (IOException e) {
+                if (mmServerSocket != null) {
+                    mmServerSocket.close();
+                    mmServerSocket = null;
+                }
+            } catch (Exception e) {
             }
         }
 
@@ -372,6 +388,7 @@ public class BluetoothService {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
+        private volatile boolean closed = false;
 
         public ConnectedThread(BluetoothSocket socket, String socketType) {
             mmSocket = socket;
@@ -424,10 +441,10 @@ public class BluetoothService {
                             arr_byte = new ArrayList<Integer>();
                         }
                     }
-                } catch (IOException e) {
-                    if (!isInterrupted()) {
+                } catch (Throwable e) {
+                    if (!closed && !isInterrupted()) {
+                        showToast("Связь с устройством прервана");
                         connectionLost();
-                        BluetoothService.this.start();
                     }
                     break;
                 }
@@ -451,8 +468,11 @@ public class BluetoothService {
         }
 
         public void cancel() {
+            closed = true;
             try {
-                mmSocket.close();
+                if (mmSocket != null) {
+                    mmSocket.close();
+                }
             } catch (IOException e) {
             }
         }
