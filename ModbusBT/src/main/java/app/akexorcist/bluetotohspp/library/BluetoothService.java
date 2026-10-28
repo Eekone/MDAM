@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 
@@ -17,8 +18,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 
 @SuppressLint("NewApi")
@@ -40,7 +39,8 @@ public class BluetoothService {
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
-    private final ExecutorService mWriter = Executors.newSingleThreadExecutor();
+    private final HandlerThread mWriterThread;
+    private final Handler mWriter;
 
     // Constructor. Prepares a new BluetoothChat session
     // context : The UI Activity Context
@@ -49,6 +49,9 @@ public class BluetoothService {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = BluetoothState.STATE_NONE;
         mHandler = handler;
+        mWriterThread = new HandlerThread("bt-writer");
+        mWriterThread.start();
+        mWriter = new Handler(mWriterThread.getLooper());
     }
 
     public static byte[] ModRTU_CRC(byte[] buf) {
@@ -207,16 +210,28 @@ public class BluetoothService {
         }
         if (r == null || out == null) return;
         final byte[] copy = Arrays.copyOf(out, out.length);
-        mWriter.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    r.write(copy);
-                } catch (Throwable t) {
-                    showToast("Не удалось отправить команду");
-                }
+        mWriter.post(new WriteRequest(r, copy, this));
+    }
+
+    private static final class WriteRequest implements Runnable {
+        private final ConnectedThread thread;
+        private final byte[] data;
+        private final BluetoothService service;
+
+        WriteRequest(ConnectedThread thread, byte[] data, BluetoothService service) {
+            this.thread = thread;
+            this.data = data;
+            this.service = service;
+        }
+
+        @Override
+        public void run() {
+            try {
+                thread.write(data);
+            } catch (Throwable t) {
+                service.showToast("Не удалось отправить команду");
             }
-        });
+        }
     }
 
     private void showToast(String text) {

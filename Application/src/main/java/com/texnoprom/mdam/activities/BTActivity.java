@@ -21,6 +21,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -145,8 +146,16 @@ public class BTActivity extends AppCompatActivity
                 drawer.closeDrawer(GravityCompat.START);
             }
         } catch (Throwable e) {
-            Toast.makeText(this, "Команда не выполнена: " + e.getClass().getSimpleName(),
-                    Toast.LENGTH_LONG).show();
+            String text = commandError(e);
+            try {
+                new AlertDialog.Builder(this)
+                        .setTitle("Команда не выполнена")
+                        .setMessage(text)
+                        .setPositiveButton("Ок", null)
+                        .show();
+            } catch (Throwable ignored) {
+                Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+            }
         }
         return true;
     }
@@ -176,6 +185,22 @@ public class BTActivity extends AppCompatActivity
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private static String commandError(Throwable error) {
+        StringBuilder text = new StringBuilder();
+        Throwable current = error;
+        while (current != null) {
+            if (text.length() > 0) {
+                text.append("\n");
+            }
+            text.append(current.getClass().getSimpleName());
+            if (current.getMessage() != null && current.getMessage().length() > 0) {
+                text.append(": ").append(current.getMessage());
+            }
+            current = current.getCause();
+        }
+        return text.toString();
     }
 
     private void setMenuGroupEnabled(boolean enabled) {

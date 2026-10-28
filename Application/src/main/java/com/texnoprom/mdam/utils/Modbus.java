@@ -14,7 +14,16 @@ import java.util.Locale;
 
 //ToDo: Implement/use trird-party Modbus library instead of hardcoded commands
 public class Modbus {
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.getDefault());
+    // yyyy is the calendar year. YYYY is the week-year and is rejected by
+    // SimpleDateFormat before Android 7, which leaves this class unloadable.
+    private static SimpleDateFormat dateFormat;
+
+    private static SimpleDateFormat dateFormat() {
+        if (dateFormat == null) {
+            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+        }
+        return dateFormat;
+    }
 
     public static byte[] MEASURE = {1, 5, 0, 5, -1, 0, (byte) 156, 59};
     public static byte[] VALUES = {1, 3, 0, 0, 0, 10, (byte) 197, (byte) 205};
@@ -67,7 +76,7 @@ public class Modbus {
 
         ArrayList<Register> registers = new ArrayList<>();
         registers.clear();
-        String date = dateFormat.format(new Date());
+        String date = dateFormat().format(new Date());
         int command = data[1];
         int number = firstRegister;
         for (int i = 3; i < data.length - 2; i = i + 2) {

@@ -15,9 +15,9 @@ public class MdamApp extends Application {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        String detail = error.getMessage();
-                        if (detail == null || detail.length() == 0) {
-                            detail = error.getClass().getSimpleName();
+                        String detail = error.getClass().getSimpleName();
+                        if (error.getMessage() != null && error.getMessage().length() > 0) {
+                            detail = detail + ": " + error.getMessage();
                         }
                         Toast.makeText(MdamApp.this, "Сбой: " + detail, Toast.LENGTH_LONG).show();
                     }
