@@ -31,6 +31,22 @@ public class Modbus {
     public static byte[] ALL = {1, 3, 0, 0, 0, 41, (byte) 132, 20};
     public static byte[] CALIBRATIONS = {1, 3, 0, 15, 0, 15, (byte) 53, (byte) 205};
     public static byte[] MISC = {1, 3, 0, 30, 0, 11, (byte) 100, 11};
+    /** Токи каналов 1–8 и сопротивления каналов 1–12. */
+    public static byte[] BKM4_CHANNELS = readHolding(12, 20);
+
+    public static byte[] readHolding(int start, int count) {
+        byte[] command = new byte[8];
+        command[0] = 1;
+        command[1] = 3;
+        command[2] = (byte) ((start >> 8) & 0xFF);
+        command[3] = (byte) (start & 0xFF);
+        command[4] = (byte) ((count >> 8) & 0xFF);
+        command[5] = (byte) (count & 0xFF);
+        byte[] crc = ModRTU_CRC(Arrays.copyOf(command, 6));
+        command[6] = crc[0];
+        command[7] = crc[1];
+        return command;
+    }
 
     public static byte[] presetRegister(int slaveAddress, int registerAddress, int value) {
         byte[] command = new byte[8];
@@ -83,10 +99,28 @@ public class Modbus {
             byte val[] = Arrays.copyOfRange(data, i, i + 2);
             ByteBuffer wrapped = ByteBuffer.wrap(val);
             short value = wrapped.getShort();
-            registers.add(new Register(command, number, RegisterInfo.Name(type, command, number), value));
+            String name = RegisterInfo.Name(type, command, number);
+            registers.add(new Register(command, number, name, displayValue(type, name, value)));
             number++;
         }
         return new RegisterBatch(date, type, registers);
+    }
+
+    /**
+     * БКМ4 хранит «00.00» в сотых, «00.0» в десятых. Остальные регистры — целые без знака.
+     * Отрицательный потенциал остаётся отрицательным.
+     */
+    public static float displayValue(String type, String name, short raw) {
+        if (!"БКМ4".equals(type) || name == null) {
+            return raw;
+        }
+        if (name.contains("00.00")) {
+            return raw / 100f;
+        }
+        if (name.contains("00.0")) {
+            return raw / 10f;
+        }
+        return raw & 0xFFFF;
     }
 
     public byte[] forceSingleCoil(byte address, short register, boolean value) {

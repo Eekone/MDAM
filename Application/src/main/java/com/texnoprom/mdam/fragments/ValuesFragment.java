@@ -69,7 +69,7 @@ public class ValuesFragment extends Fragment {
                 }
             });
         } else {
-            ((BTActivity) getActivity()).sen(Modbus.VALUES);
+            srl.setRefreshing(false);
         }
     }
 }

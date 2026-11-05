@@ -79,7 +79,7 @@ public class BluetoothSPP {
                 case BluetoothState.MESSAGE_STATE_CHANGE:
                     if (mBluetoothStateListener != null)
                         mBluetoothStateListener.onServiceStateChanged(msg.arg1);
-                    if (isConnected && msg.arg1 != BluetoothState.STATE_CONNECTED) {
+                    if (isConnected && msg.arg1 == BluetoothState.STATE_NONE) {
                         if (mBluetoothConnectionListener != null)
                             mBluetoothConnectionListener.onDeviceDisconnected();
                         if (isAutoConnectionEnabled) {
@@ -97,6 +97,7 @@ public class BluetoothSPP {
                         if (msg.arg1 != BluetoothState.STATE_CONNECTED) {
                             if (mBluetoothConnectionListener != null)
                                 mBluetoothConnectionListener.onDeviceConnectionFailed();
+                            isConnected = false;
                         }
                         isConnecting = false;
                     }

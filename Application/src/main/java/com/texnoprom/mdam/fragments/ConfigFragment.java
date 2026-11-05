@@ -68,7 +68,7 @@ public class ConfigFragment extends Fragment {
                 }
             });
         } else {
-            ((BTActivity) getActivity()).sen(Modbus.CONFIG);
+            srl.setRefreshing(false);
         }
     }
 }

@@ -95,10 +95,7 @@ public class MiscFragment extends Fragment {
                 }
             });
         } else {
-            position = listView.getFirstVisiblePosition();
-            View v = listView.getChildAt(0);
-            top = (v == null) ? 0 : (v.getTop() - listView.getPaddingTop());
-            ((BTActivity) getActivity()).sen(Modbus.MISC);
+            srl.setRefreshing(false);
         }
     }
 }

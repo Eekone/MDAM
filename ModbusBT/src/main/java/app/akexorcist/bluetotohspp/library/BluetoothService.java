@@ -41,6 +41,9 @@ public class BluetoothService {
     private int mState;
     private final HandlerThread mWriterThread;
     private final Handler mWriter;
+    private BluetoothDevice mLastDevice;
+    private boolean userStop;
+    private boolean reconnecting;
 
     // Constructor. Prepares a new BluetoothChat session
     // context : The UI Activity Context
@@ -119,6 +122,8 @@ public class BluetoothService {
     // device : The BluetoothDevice to connect
     // secure : Socket Security type - Secure (true) , Insecure (false)
     public synchronized void connect(BluetoothDevice device) {
+        userStop = false;
+        mLastDevice = device;
         // Cancel any thread attempting to make a connection
         if (mState == BluetoothState.STATE_CONNECTING) {
             if (mConnectThread != null) {
@@ -166,6 +171,7 @@ public class BluetoothService {
         }
 
         // Start the thread to manage the connection and perform transmissions
+        reconnecting = false;
         mConnectedThread = new ConnectedThread(socket, socketType);
         mConnectedThread.start();
 
@@ -182,6 +188,8 @@ public class BluetoothService {
 
     // Stop all threads
     public synchronized void stop() {
+        userStop = true;
+        reconnecting = false;
         if (mConnectThread != null) {
             mConnectThread.cancel();
             mConnectThread = null;
@@ -254,13 +262,29 @@ public class BluetoothService {
     // Indicate that the connection was lost and notify the UI Activity
     private void connectionLost() {
         ConnectedThread dead;
+        final BluetoothDevice again;
         synchronized (this) {
             dead = mConnectedThread;
             mConnectedThread = null;
+            again = mLastDevice;
         }
         if (dead != null && Thread.currentThread() != dead) {
             dead.cancel();
         }
+        if (!userStop && again != null && !reconnecting) {
+            reconnecting = true;
+            setState(BluetoothState.STATE_CONNECTING);
+            mWriter.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (!userStop) {
+                        connect(again);
+                    }
+                }
+            }, 500);
+            return;
+        }
+        reconnecting = false;
         setState(BluetoothState.STATE_NONE);
     }
 
@@ -397,6 +421,33 @@ public class BluetoothService {
         }
     }
 
+    static int modbusFrameLength(ArrayList<Integer> buf) {
+        if (buf.size() < 2) {
+            return -1;
+        }
+        int function = buf.get(1) & 0xFF;
+        if ((function & 0x80) != 0) {
+            return 5;
+        }
+        switch (function) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                if (buf.size() < 3) {
+                    return -1;
+                }
+                return 5 + (buf.get(2) & 0xFF);
+            case 5:
+            case 6:
+            case 15:
+            case 16:
+                return 8;
+            default:
+                return -1;
+        }
+    }
+
     // This thread runs during a connection with a remote device.
     // It handles all incoming and outgoing transmissions.
     private class ConnectedThread extends Thread {
@@ -422,7 +473,6 @@ public class BluetoothService {
         }
 
         public void run() {
-            byte[] buffer;
             ArrayList<Integer> arr_byte = new ArrayList<Integer>();
             while (!isInterrupted()) {
                 try {
@@ -434,31 +484,34 @@ public class BluetoothService {
                         throw new IOException("Соединение закрыто");
                     }
                     arr_byte.add(data);
-                    if (arr_byte.size() > 256) {
-                        arr_byte.remove(0);
-                    }
-                    if (arr_byte.size() > 2) {
-                        byte bData[] = new byte[arr_byte.size() - 2];
-                        for (int k = 0; k < arr_byte.size() - 2; k++)
-                            bData[k] = arr_byte.get(k).byteValue();
-
-                        byte crc[] = ModRTU_CRC(bData);
-                        byte dCrc[] = new byte[]{arr_byte.get(arr_byte.size() - 2).byteValue(),
-                                arr_byte.get(arr_byte.size() - 1).byteValue()};
-
-                        if (Arrays.equals(crc, dCrc)) {
-                            buffer = new byte[arr_byte.size()];
-                            for (int i = 0; i < arr_byte.size(); i++) {
-                                buffer[i] = arr_byte.get(i).byteValue();
-                            }
+                    while (arr_byte.size() >= 4) {
+                        int need = modbusFrameLength(arr_byte);
+                        if (need < 0 || need > 256) {
+                            arr_byte.remove(0);
+                            continue;
+                        }
+                        if (arr_byte.size() < need) {
+                            break;
+                        }
+                        byte[] frame = new byte[need];
+                        for (int i = 0; i < need; i++) {
+                            frame[i] = arr_byte.get(i).byteValue();
+                        }
+                        byte[] body = new byte[need - 2];
+                        System.arraycopy(frame, 0, body, 0, need - 2);
+                        byte[] crc = ModRTU_CRC(body);
+                        if (crc[0] == frame[need - 2] && crc[1] == frame[need - 1]) {
                             mHandler.obtainMessage(BluetoothState.MESSAGE_READ
-                                    , buffer.length, -1, buffer).sendToTarget();
-                            arr_byte = new ArrayList<Integer>();
+                                    , frame.length, -1, frame).sendToTarget();
+                            for (int i = 0; i < need; i++) {
+                                arr_byte.remove(0);
+                            }
+                        } else {
+                            arr_byte.remove(0);
                         }
                     }
                 } catch (Throwable e) {
                     if (!closed && !isInterrupted()) {
-                        showToast("Связь с устройством прервана");
                         connectionLost();
                     }
                     break;

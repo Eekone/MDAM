@@ -62,6 +62,10 @@ public class BTActivity extends AppCompatActivity
         bt.send(data);
     }
 
+    public String getDeviceType() {
+        return deviceType;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

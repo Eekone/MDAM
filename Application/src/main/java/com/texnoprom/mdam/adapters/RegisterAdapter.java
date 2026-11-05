@@ -12,6 +12,7 @@ import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.models.Register;
 
 import java.util.List;
+import java.util.Locale;
 
 public class RegisterAdapter extends ArrayAdapter<Register> {
 
@@ -44,10 +45,18 @@ public class RegisterAdapter extends ArrayAdapter<Register> {
         }
         viewHolder.regNumber.setText(res.getString(R.string.register_number_ph, Register.getNumber() + 1));
         viewHolder.regTitle.setText(Register.getName());
-        viewHolder.regValue.setText(Float.toString(Register.getValue()));
+        viewHolder.regValue.setText(formatReading(Register.getValue()));
         // viewHolder.regUnit.setText(RegisterInfo.Unit(Register));
 
         return convertView;
+    }
+
+    private static String formatReading(float value) {
+        float rounded = Math.round(value * 100f) / 100f;
+        if (Math.abs(rounded - Math.round(rounded)) < 0.001f) {
+            return String.valueOf((long) Math.round(rounded));
+        }
+        return String.format(Locale.US, "%.2f", rounded);
     }
 
     private static class ViewHolder {

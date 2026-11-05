@@ -39,7 +39,7 @@ public class CalibrationsFragment extends Fragment {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        ((BTActivity) getActivity()).sen(Modbus.CALIBRATIONS);
+                        ((BTActivity) getActivity()).sen(calibrationCommand());
                     }
                 }
         );
@@ -49,14 +49,14 @@ public class CalibrationsFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ((BTActivity) getActivity()).sen(Modbus.CALIBRATIONS);
+        ((BTActivity) getActivity()).sen(calibrationCommand());
         getActivity().setTitle("Калибровки");
     }
 
     public void handleInputData(byte[] data, String deviceType) {
         if (data[1] == 3) {
             srl.setRefreshing(false);
-            registerBatch = Modbus.RegistersFromData(data, deviceType, 15);
+            registerBatch = Modbus.RegistersFromData(data, deviceType, calibrationOrigin());
             RegisterAdapter adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
             listView.setAdapter(adapter);
             listView.setSelectionFromTop(position, top);
@@ -96,10 +96,23 @@ public class CalibrationsFragment extends Fragment {
                 }
             });
         } else {
-            position = listView.getFirstVisiblePosition();
-            View v = listView.getChildAt(0);
-            top = (v == null) ? 0 : (v.getTop() - listView.getPaddingTop());
-            ((BTActivity) getActivity()).sen(Modbus.CALIBRATIONS);
+            srl.setRefreshing(false);
         }
+    }
+
+    private byte[] calibrationCommand() {
+        if (isBkm4()) {
+            return Modbus.BKM4_CHANNELS;
+        }
+        return Modbus.CALIBRATIONS;
+    }
+
+    private int calibrationOrigin() {
+        return isBkm4() ? 12 : 15;
+    }
+
+    private boolean isBkm4() {
+        return getActivity() instanceof BTActivity
+                && "БКМ4".equals(((BTActivity) getActivity()).getDeviceType());
     }
 }
