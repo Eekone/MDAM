@@ -54,8 +54,9 @@ public class BKM1CommandTest {
     }
 
     @Test
-    public void bkm4Channels_coverEightCurrentsAndTwelveResistances() {
-        assertArrayEquals(Modbus.readHolding(12, 20), Modbus.BKM4_CHANNELS);
+    public void bkm4Channels_includeFirstTwelveReadings() {
+        assertArrayEquals(Modbus.readHolding(0, 12), Modbus.BKM4_VALUES);
+        assertArrayEquals(Modbus.readHolding(0, 32), Modbus.BKM4_CHANNELS);
     }
 
     @Test

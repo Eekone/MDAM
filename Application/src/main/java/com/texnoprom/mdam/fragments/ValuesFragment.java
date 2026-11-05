@@ -36,7 +36,7 @@ public class ValuesFragment extends Fragment {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        ((BTActivity) getActivity()).sen(Modbus.VALUES);
+                        ((BTActivity) getActivity()).sen(valuesCommand());
                     }
                 }
         );
@@ -46,7 +46,7 @@ public class ValuesFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ((BTActivity) getActivity()).sen(Modbus.VALUES);
+        ((BTActivity) getActivity()).sen(valuesCommand());
         getActivity().setTitle("Значения");
     }
 
@@ -71,6 +71,14 @@ public class ValuesFragment extends Fragment {
         } else {
             srl.setRefreshing(false);
         }
+    }
+
+    private byte[] valuesCommand() {
+        if (getActivity() instanceof BTActivity
+                && "БКМ4".equals(((BTActivity) getActivity()).getDeviceType())) {
+            return Modbus.BKM4_VALUES;
+        }
+        return Modbus.VALUES;
     }
 }
 

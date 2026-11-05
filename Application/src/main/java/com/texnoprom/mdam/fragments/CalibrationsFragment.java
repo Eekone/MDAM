@@ -108,7 +108,7 @@ public class CalibrationsFragment extends Fragment {
     }
 
     private int calibrationOrigin() {
-        return isBkm4() ? 12 : 15;
+        return isBkm4() ? 0 : 15;
     }
 
     private boolean isBkm4() {

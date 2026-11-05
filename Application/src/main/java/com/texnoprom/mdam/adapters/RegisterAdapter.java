@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.models.Register;
+import com.texnoprom.mdam.utils.ParameterText;
 
 import java.util.List;
 import java.util.Locale;
@@ -44,9 +45,13 @@ public class RegisterAdapter extends ArrayAdapter<Register> {
             viewHolder = (ViewHolder) convertView.getTag();
         }
         viewHolder.regNumber.setText(res.getString(R.string.register_number_ph, Register.getNumber() + 1));
-        viewHolder.regTitle.setText(Register.getName());
+        viewHolder.regTitle.setText(ParameterText.name(Register.getName()));
         viewHolder.regValue.setText(formatReading(Register.getValue()));
-        // viewHolder.regUnit.setText(RegisterInfo.Unit(Register));
+        String unit = Register.getUnit();
+        if (unit == null || unit.trim().length() == 0) {
+            unit = ParameterText.unit(Register.getName());
+        }
+        viewHolder.regUnit.setText(unit);
 
         return convertView;
     }

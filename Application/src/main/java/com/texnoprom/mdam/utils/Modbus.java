@@ -31,8 +31,10 @@ public class Modbus {
     public static byte[] ALL = {1, 3, 0, 0, 0, 41, (byte) 132, 20};
     public static byte[] CALIBRATIONS = {1, 3, 0, 15, 0, 15, (byte) 53, (byte) 205};
     public static byte[] MISC = {1, 3, 0, 30, 0, 11, (byte) 100, 11};
-    /** Токи каналов 1–8 и сопротивления каналов 1–12. */
-    public static byte[] BKM4_CHANNELS = readHolding(12, 20);
+    /** Первые 12 измеряемых величин БКМ4. */
+    public static byte[] BKM4_VALUES = readHolding(0, 12);
+    /** Те же 12 величин, затем токи 1–8 и сопротивления 1–12. */
+    public static byte[] BKM4_CHANNELS = readHolding(0, 32);
 
     public static byte[] readHolding(int start, int count) {
         byte[] command = new byte[8];
@@ -99,8 +101,11 @@ public class Modbus {
             byte val[] = Arrays.copyOfRange(data, i, i + 2);
             ByteBuffer wrapped = ByteBuffer.wrap(val);
             short value = wrapped.getShort();
-            String name = RegisterInfo.Name(type, command, number);
-            registers.add(new Register(command, number, name, displayValue(type, name, value)));
+            String rawName = RegisterInfo.Name(type, command, number);
+            Register register = new Register(command, number, ParameterText.name(rawName),
+                    displayValue(type, rawName, value));
+            register.setUnit(unitOf(type, register, rawName));
+            registers.add(register);
             number++;
         }
         return new RegisterBatch(date, type, registers);
@@ -121,6 +126,17 @@ public class Modbus {
             return raw / 10f;
         }
         return raw & 0xFFFF;
+    }
+
+    private static String unitOf(String type, Register register, String rawName) {
+        String fromTable = RegisterInfo.Unit(register, type);
+        if (fromTable != null) {
+            String trimmed = fromTable.trim();
+            if (trimmed.length() > 0 && !"?".equals(trimmed) && !trimmed.startsWith("No ")) {
+                return trimmed;
+            }
+        }
+        return ParameterText.unit(rawName);
     }
 
     public byte[] forceSingleCoil(byte address, short register, boolean value) {
