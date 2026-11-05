@@ -10,8 +10,10 @@ import android.widget.TextView;
 
 import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.models.Register;
+import com.texnoprom.mdam.utils.ParameterText;
 
 import java.util.List;
+import java.util.Locale;
 
 public class RegisterAdapter extends ArrayAdapter<Register> {
 
@@ -43,11 +45,23 @@ public class RegisterAdapter extends ArrayAdapter<Register> {
             viewHolder = (ViewHolder) convertView.getTag();
         }
         viewHolder.regNumber.setText(res.getString(R.string.register_number_ph, Register.getNumber() + 1));
-        viewHolder.regTitle.setText(Register.getName());
-        viewHolder.regValue.setText(Float.toString(Register.getValue()));
-        // viewHolder.regUnit.setText(RegisterInfo.Unit(Register));
+        viewHolder.regTitle.setText(ParameterText.name(Register.getName()));
+        viewHolder.regValue.setText(formatReading(Register.getValue()));
+        String unit = Register.getUnit();
+        if (unit == null || unit.trim().length() == 0) {
+            unit = ParameterText.unit(Register.getName());
+        }
+        viewHolder.regUnit.setText(unit);
 
         return convertView;
+    }
+
+    private static String formatReading(float value) {
+        float rounded = Math.round(value * 100f) / 100f;
+        if (Math.abs(rounded - Math.round(rounded)) < 0.001f) {
+            return String.valueOf((long) Math.round(rounded));
+        }
+        return String.format(Locale.US, "%.2f", rounded);
     }
 
     private static class ViewHolder {

@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.activities.BTActivity;
@@ -38,7 +39,7 @@ public class CalibrationsFragment extends Fragment {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        ((BTActivity) getActivity()).sen(Modbus.CALIBRATIONS);
+                        ((BTActivity) getActivity()).sen(calibrationCommand());
                     }
                 }
         );
@@ -48,14 +49,14 @@ public class CalibrationsFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ((BTActivity) getActivity()).sen(Modbus.CALIBRATIONS);
+        ((BTActivity) getActivity()).sen(calibrationCommand());
         getActivity().setTitle("Калибровки");
     }
 
     public void handleInputData(byte[] data, String deviceType) {
         if (data[1] == 3) {
             srl.setRefreshing(false);
-            registerBatch = Modbus.RegistersFromData(data, deviceType, 15);
+            registerBatch = Modbus.RegistersFromData(data, deviceType, calibrationOrigin());
             RegisterAdapter adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
             listView.setAdapter(adapter);
             listView.setSelectionFromTop(position, top);
@@ -71,9 +72,18 @@ public class CalibrationsFragment extends Fragment {
                     builder.setPositiveButton("Ввод", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            ((BTActivity) getActivity()).sen(Modbus.presetRegister(1,
-                                    registerBatch.getRegisters().get(0).getNumber() + arg2,
-                                    Integer.valueOf(input.getText().toString())));
+                            String raw = input.getText().toString().trim();
+                            if (raw.length() == 0) {
+                                Toast.makeText(getActivity(), "Введите число", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            try {
+                                ((BTActivity) getActivity()).sen(Modbus.presetRegister(1,
+                                        registerBatch.getRegisters().get(0).getNumber() + arg2,
+                                        Integer.parseInt(raw)));
+                            } catch (NumberFormatException e) {
+                                Toast.makeText(getActivity(), "Введите число", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     });
                     builder.setNegativeButton("Назад", new DialogInterface.OnClickListener() {
@@ -86,10 +96,23 @@ public class CalibrationsFragment extends Fragment {
                 }
             });
         } else {
-            position = listView.getFirstVisiblePosition();
-            View v = listView.getChildAt(0);
-            top = (v == null) ? 0 : (v.getTop() - listView.getPaddingTop());
-            ((BTActivity) getActivity()).sen(Modbus.CALIBRATIONS);
+            srl.setRefreshing(false);
         }
+    }
+
+    private byte[] calibrationCommand() {
+        if (isBkm4()) {
+            return Modbus.BKM4_CHANNELS;
+        }
+        return Modbus.CALIBRATIONS;
+    }
+
+    private int calibrationOrigin() {
+        return isBkm4() ? 0 : 15;
+    }
+
+    private boolean isBkm4() {
+        return getActivity() instanceof BTActivity
+                && "БКМ4".equals(((BTActivity) getActivity()).getDeviceType());
     }
 }

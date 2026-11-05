@@ -5,6 +5,7 @@ import com.texnoprom.mdam.utils.Modbus;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 //TODO: Rework according to Modbus changes
 public class BKM1CommandTest {
@@ -45,5 +46,24 @@ public class BKM1CommandTest {
     @Test
     public void misc_isCorrectCommand() throws Exception {
         assertArrayEquals(MISC, Modbus.MISC);
+    }
+
+    @Test
+    public void readHolding_matchesExistingValuesCommand() {
+        assertArrayEquals(VALUES, Modbus.readHolding(0, 10));
+    }
+
+    @Test
+    public void bkm4Channels_includeFirstTwelveReadings() {
+        assertArrayEquals(Modbus.readHolding(0, 12), Modbus.BKM4_VALUES);
+        assertArrayEquals(Modbus.readHolding(0, 32), Modbus.BKM4_CHANNELS);
+    }
+
+    @Test
+    public void bkm4DisplayValue_usesFixedPointFromTitle() {
+        assertEquals(-1.23f, Modbus.displayValue("БКМ4", "Потенциал \"00.00\" В", (short) -123), 0.001f);
+        assertEquals(10.5f, Modbus.displayValue("БКМ4", "Значение тока канал 1 \"00.0\" А", (short) 105), 0.001f);
+        assertEquals(40000f, Modbus.displayValue("БКМ4", "Сопротивление канала 1 \"0000\" Ом", (short) 40000), 0.001f);
+        assertEquals(100f, Modbus.displayValue("БКМ1", "Потенциал", (short) 100), 0.001f);
     }
 }

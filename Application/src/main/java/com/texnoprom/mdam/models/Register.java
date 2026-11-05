@@ -8,6 +8,7 @@ public class Register {
     private int command;
     private int number;
     private String name;
+    private String unit = "";
     private float value;
 
     public Register(int command, int number, String name, float value) {
@@ -46,6 +47,14 @@ public class Register {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit == null ? "" : unit;
     }
 
     public float getValue() {

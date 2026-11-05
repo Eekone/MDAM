@@ -12,15 +12,22 @@ public class RegisterBatch {
     private String type;
 
     private List<Register> registers = new ArrayList<>();
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.getDefault());
+    private static SimpleDateFormat dateFormat;
+
+    private static SimpleDateFormat dateFormat() {
+        if (dateFormat == null) {
+            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+        }
+        return dateFormat;
+    }
 
     public RegisterBatch(String type) {
-        this.timestamp = dateFormat.format(new Date());
+        this.timestamp = dateFormat().format(new Date());
         this.type = type;
     }
 
     public RegisterBatch() {
-        this.timestamp = dateFormat.format(new Date());
+        this.timestamp = dateFormat().format(new Date());
     }
 
     public RegisterBatch(String timestamp, String type, List<Register> registers) {

@@ -75,7 +75,7 @@ public abstract class RegisterInfo {
                 default:
                     return "No Such Type!";
             }
-        } catch (NullPointerException ex) {
+        } catch (RuntimeException ex) {
             return "No Info!";
         }
     }
@@ -118,7 +118,7 @@ public abstract class RegisterInfo {
                 default:
                     return "No Such Type!";
             }
-        } catch (NullPointerException ex) {
+        } catch (RuntimeException ex) {
             return "No Info!";
         }
     }
@@ -145,7 +145,7 @@ public abstract class RegisterInfo {
                 default:
                     return "";
             }
-        } catch (NullPointerException ex) {
+        } catch (RuntimeException ex) {
             return "No Info!";
         }
     }
