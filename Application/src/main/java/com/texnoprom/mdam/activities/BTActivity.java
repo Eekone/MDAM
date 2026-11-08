@@ -40,6 +40,7 @@ import com.texnoprom.mdam.fragments.ValuesFragment;
 import com.texnoprom.mdam.models.RegisterBatch;
 import com.texnoprom.mdam.models.RegisterInfo;
 import com.texnoprom.mdam.services.ApiHelper;
+import com.texnoprom.mdam.utils.Bkm1MeasureGuard;
 import com.texnoprom.mdam.utils.Modbus;
 
 import app.akexorcist.bluetotohspp.library.BluetoothSPP;
@@ -57,6 +58,7 @@ public class BTActivity extends AppCompatActivity
 
     ApiHelper apiHelper = new ApiHelper();
     boolean gonnaBeSaved = false;
+    private final Bkm1MeasureGuard measureGuard = new Bkm1MeasureGuard();
 
     public void sen(byte[] data) {
         bt.send(data);
@@ -141,7 +143,11 @@ public class BTActivity extends AppCompatActivity
             switch (item.getItemId()) {
                 case R.id.nav_measure:
                     cancelCalibrationRead();
-                    bt.send(Modbus.MEASURE);
+                    if ("БКМ1".equals(deviceType)) {
+                        bt.send(measureGuard.begin(calibrationSnapshot()));
+                    } else {
+                        bt.send(Modbus.MEASURE);
+                    }
                     break;
                 default:
                     displaySelectedScreen(item.getItemId());
@@ -213,6 +219,28 @@ public class BTActivity extends AppCompatActivity
         try {
             menuNav.setGroupEnabled(R.id.nav_functions, enabled);
         } catch (Throwable ignored) {
+        }
+    }
+
+    private short[] calibrationSnapshot() {
+        if (!"calibration".equals(currentFragment)) {
+            return null;
+        }
+        Fragment found = getSupportFragmentManager().findFragmentByTag(currentFragment);
+        if (found instanceof CalibrationsFragment) {
+            return ((CalibrationsFragment) found).rawRange(
+                    Bkm1MeasureGuard.FIRST, Bkm1MeasureGuard.COUNT);
+        }
+        return null;
+    }
+
+    private void reloadOpenCalibration() {
+        if (!"calibration".equals(currentFragment)) {
+            return;
+        }
+        Fragment found = getSupportFragmentManager().findFragmentByTag(currentFragment);
+        if (found instanceof CalibrationsFragment) {
+            ((CalibrationsFragment) found).reload();
         }
     }
 
@@ -331,6 +359,18 @@ public class BTActivity extends AppCompatActivity
         //Обработчик принятных данных
         bt.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
             public void onDataReceived(byte[] data, String message) {
+                if (measureGuard.isBusy()) {
+                    byte[] next = measureGuard.accept(data);
+                    if (measureGuard.consumed()) {
+                        if (next != null) {
+                            bt.send(next);
+                        }
+                        if (measureGuard.finished()) {
+                            reloadOpenCalibration();
+                        }
+                        return;
+                    }
+                }
                 if (gonnaBeSaved) {
                     RegisterBatch registerBatch = Modbus.RegistersFromData(data, deviceType, 0);
                     apiHelper.postRegisters(registerBatch, postRegistersCallback);
