@@ -20,6 +20,7 @@ import com.texnoprom.mdam.activities.BTActivity;
 import com.texnoprom.mdam.adapters.RegisterAdapter;
 import com.texnoprom.mdam.models.Register;
 import com.texnoprom.mdam.models.RegisterBatch;
+import com.texnoprom.mdam.utils.Bkm1EnteredCalibrationWrite;
 import com.texnoprom.mdam.utils.Modbus;
 
 
@@ -32,6 +33,7 @@ public class CalibrationsFragment extends Fragment {
     private int expectedStart = -1;
     private int expectedCount = 0;
     private int pendingWrite = -1;
+    private final Bkm1EnteredCalibrationWrite enteredWrite = new Bkm1EnteredCalibrationWrite();
 
     @Nullable
     @Override
@@ -43,7 +45,11 @@ public class CalibrationsFragment extends Fragment {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        readCalibrationBlock();
+                        if (isBkm4()) {
+                            readCalibrationBlock();
+                        } else {
+                            writeEnteredCalibrations();
+                        }
                     }
                 }
         );
@@ -55,7 +61,9 @@ public class CalibrationsFragment extends Fragment {
                 final int registerAddress = registerBatch.getRegisters().get(arg2).getNumber();
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setTitle("Введите значение:");
-                builder.setMessage("Целое число этого регистра");
+                builder.setMessage(isBkm4()
+                        ? "Целое число этого регистра"
+                        : "Число останется в строке. Потяните список вниз, чтобы записать в модуль");
                 final EditText input = new EditText(getActivity());
                 input.setInputType(InputType.TYPE_CLASS_NUMBER);
                 builder.setView(input);
@@ -69,6 +77,10 @@ public class CalibrationsFragment extends Fragment {
                         }
                         try {
                             int value = Integer.parseInt(raw);
+                            if (!isBkm4()) {
+                                rememberEnteredValue(registerAddress, value);
+                                return;
+                            }
                             pendingWrite = registerAddress;
                             expectedCount = 0;
                             ((BTActivity) getActivity()).sen(Modbus.presetRegister(1, registerAddress, value));
@@ -99,6 +111,7 @@ public class CalibrationsFragment extends Fragment {
     public void cancelPendingRead() {
         expectedCount = 0;
         pendingWrite = -1;
+        enteredWrite.cancel();
     }
 
     public void reload() {
@@ -109,6 +122,17 @@ public class CalibrationsFragment extends Fragment {
     }
 
     public void handleInputData(byte[] data, String deviceType) {
+        if (enteredWrite.isBusy()) {
+            byte[] next = enteredWrite.accept(data);
+            if (enteredWrite.consumed()) {
+                if (next != null) {
+                    ((BTActivity) getActivity()).sen(next);
+                } else if (enteredWrite.finished()) {
+                    readCalibrationBlock();
+                }
+                return;
+            }
+        }
         if (srl != null) {
             srl.setRefreshing(false);
         }
@@ -146,6 +170,59 @@ public class CalibrationsFragment extends Fragment {
             showRegisters();
         }
         expectedCount = 0;
+    }
+
+    private void rememberEnteredValue(int registerAddress, int value) {
+        if (registerBatch == null) {
+            return;
+        }
+        for (Register row : registerBatch.getRegisters()) {
+            if (row.getNumber() == registerAddress) {
+                row.setValue(value);
+                showRegisters();
+                return;
+            }
+        }
+    }
+
+    private void writeEnteredCalibrations() {
+        if (registerBatch == null) {
+            if (srl != null) {
+                srl.setRefreshing(false);
+            }
+            return;
+        }
+        int count = 0;
+        for (Register row : registerBatch.getRegisters()) {
+            int number = row.getNumber();
+            if (number >= Bkm1EnteredCalibrationWrite.FIRST && number <= Bkm1EnteredCalibrationWrite.LAST) {
+                count++;
+            }
+        }
+        int[] addresses = new int[count];
+        int[] values = new int[count];
+        int at = 0;
+        for (int number = Bkm1EnteredCalibrationWrite.FIRST; number <= Bkm1EnteredCalibrationWrite.LAST; number++) {
+            for (Register row : registerBatch.getRegisters()) {
+                if (row.getNumber() == number) {
+                    addresses[at] = number;
+                    values[at] = Math.round(row.getValue());
+                    at++;
+                    break;
+                }
+            }
+        }
+        pendingWrite = -1;
+        expectedCount = 0;
+        byte[] first = enteredWrite.begin(addresses, values);
+        if (first == null) {
+            if (srl != null) {
+                srl.setRefreshing(false);
+            }
+            Toast.makeText(getActivity(), "Нет значений для записи", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        ((BTActivity) getActivity()).sen(first);
     }
 
     private void readCalibrationBlock() {
