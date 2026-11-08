@@ -2,6 +2,8 @@ package com.texnoprom.mdam.fragments;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -34,6 +36,16 @@ public class CalibrationsFragment extends Fragment {
     private int expectedCount = 0;
     private int pendingWrite = -1;
     private final Bkm1EnteredCalibrationWrite enteredWrite = new Bkm1EnteredCalibrationWrite();
+    private final Handler readBack = new Handler(Looper.getMainLooper());
+    private final Runnable readBackRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (getActivity() == null) {
+                return;
+            }
+            readCalibrationBlock();
+        }
+    };
 
     @Nullable
     @Override
@@ -112,6 +124,13 @@ public class CalibrationsFragment extends Fragment {
         expectedCount = 0;
         pendingWrite = -1;
         enteredWrite.cancel();
+        readBack.removeCallbacks(readBackRunnable);
+    }
+
+    @Override
+    public void onDestroyView() {
+        readBack.removeCallbacks(readBackRunnable);
+        super.onDestroyView();
     }
 
     public void reload() {
@@ -128,7 +147,7 @@ public class CalibrationsFragment extends Fragment {
                 if (next != null) {
                     ((BTActivity) getActivity()).sen(next);
                 } else if (enteredWrite.finished()) {
-                    readCalibrationBlock();
+                    readBack.postDelayed(readBackRunnable, 1000);
                 }
                 return;
             }
@@ -214,6 +233,7 @@ public class CalibrationsFragment extends Fragment {
         }
         pendingWrite = -1;
         expectedCount = 0;
+        readBack.removeCallbacks(readBackRunnable);
         byte[] first = enteredWrite.begin(addresses, values);
         if (first == null) {
             if (srl != null) {
