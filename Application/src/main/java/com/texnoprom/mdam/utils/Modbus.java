@@ -156,20 +156,13 @@ public class Modbus {
         return raw & 0xFFFF;
     }
 
-    /**
-     * Экран «Значения» БКМ1: регистр хранит сотые доли.
-     * Защитный и поляризационный потенциалы показываются со знаком минус.
-     */
+    /** Экран «Значения» БКМ1: регистр хранит сотые доли, знак остаётся как в модуле. */
     public static void applyBkm1ValueScale(List<Register> registers) {
         if (registers == null) {
             return;
         }
         for (Register register : registers) {
-            float scaled = register.getValue() * 0.01f;
-            if (register.getNumber() == 0 || register.getNumber() == 1) {
-                scaled = -Math.abs(scaled);
-            }
-            register.setValue(scaled);
+            register.setValue(register.getValue() * 0.01f);
         }
     }
 

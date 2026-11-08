@@ -88,13 +88,13 @@ public class BKM1CommandTest {
     }
 
     @Test
-    public void bkm1Values_scaleByHundredthAndShareNegativePolarity() {
-        Register protective = new Register(3, 0, "Потенциал защитный", 850);
+    public void bkm1Values_keepTheSignSentByTheModule() {
+        Register protective = new Register(3, 0, "Потенциал защитный", -850);
         Register polarization = new Register(3, 1, "Поляризационный потенциал", 1050);
         Register current = new Register(3, 3, "Ток в трубопроводе", 250);
         Modbus.applyBkm1ValueScale(Arrays.asList(protective, polarization, current));
         assertEquals(-8.5f, protective.getValue(), 0.001f);
-        assertEquals(-10.5f, polarization.getValue(), 0.001f);
+        assertEquals(10.5f, polarization.getValue(), 0.001f);
         assertEquals(2.5f, current.getValue(), 0.001f);
     }
 
