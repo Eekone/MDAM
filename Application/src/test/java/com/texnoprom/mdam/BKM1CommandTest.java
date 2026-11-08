@@ -88,14 +88,21 @@ public class BKM1CommandTest {
     }
 
     @Test
-    public void bkm1Values_keepTheSignSentByTheModule() {
+    public void bkm1Values_scaleOnlyPotentialsTemperatureAndBattery() {
         Register protective = new Register(3, 0, "Потенциал защитный", -850);
         Register polarization = new Register(3, 1, "Поляризационный потенциал", 1050);
         Register current = new Register(3, 3, "Ток в трубопроводе", 250);
-        Modbus.applyBkm1ValueScale(Arrays.asList(protective, polarization, current));
+        Register temperature = new Register(3, 7, "Температура корпуса", 253);
+        Register battery = new Register(3, 8, "Напряжение батареи питания", 24575);
+        Register door = new Register(3, 9, "Сопротивление датчика вскрытия", 400);
+        Modbus.applyBkm1ValueScale(Arrays.asList(
+                protective, polarization, current, temperature, battery, door));
         assertEquals(-8.5f, protective.getValue(), 0.001f);
         assertEquals(10.5f, polarization.getValue(), 0.001f);
-        assertEquals(2.5f, current.getValue(), 0.001f);
+        assertEquals(250f, current.getValue(), 0.001f);
+        assertEquals(25.3f, temperature.getValue(), 0.001f);
+        assertEquals(24575f * 1000f / 65536f, battery.getValue(), 0.01f);
+        assertEquals(400f, door.getValue(), 0.001f);
     }
 
     @Test

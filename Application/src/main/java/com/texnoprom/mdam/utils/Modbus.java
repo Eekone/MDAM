@@ -156,13 +156,29 @@ public class Modbus {
         return raw & 0xFFFF;
     }
 
-    /** Экран «Значения» БКМ1: регистр хранит сотые доли, знак остаётся как в модуле. */
+    /**
+     * Экран «Значения» БКМ1. Номер строки на экране на 1 больше адреса регистра.
+     * [1]–[3] хранят сотые, знак как в модуле.
+     * [8] температура — десятые.
+     * [9] батарея — код АЦП 0…65535 на шкале 0…1000.
+     * [4]–[7] и [10] показываются как есть.
+     */
     public static void applyBkm1ValueScale(List<Register> registers) {
         if (registers == null) {
             return;
         }
         for (Register register : registers) {
-            register.setValue(register.getValue() * 0.01f);
+            int raw = Math.round(register.getValue());
+            float shown = raw;
+            int number = register.getNumber();
+            if (number >= 0 && number <= 2) {
+                shown = raw * 0.01f;
+            } else if (number == 7) {
+                shown = raw * 0.1f;
+            } else if (number == 8) {
+                shown = (raw & 0xFFFF) * 1000f / 65536f;
+            }
+            register.setValue(shown);
         }
     }
 
