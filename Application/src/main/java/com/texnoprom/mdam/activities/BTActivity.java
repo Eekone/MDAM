@@ -59,6 +59,8 @@ public class BTActivity extends AppCompatActivity
     ApiHelper apiHelper = new ApiHelper();
     boolean gonnaBeSaved = false;
     private final Bkm1MeasureGuard measureGuard = new Bkm1MeasureGuard();
+    private boolean awaitingConfig;
+    private RegisterBatch connectedConfig;
 
     public void sen(byte[] data) {
         bt.send(data);
@@ -66,6 +68,18 @@ public class BTActivity extends AppCompatActivity
 
     public boolean isConnected() {
         return bt != null && bt.getServiceState() == BluetoothState.STATE_CONNECTED;
+    }
+
+    public RegisterBatch connectedConfig() {
+        return connectedConfig;
+    }
+
+    public boolean isConfigReadPending() {
+        return awaitingConfig;
+    }
+
+    public void rememberConfig(RegisterBatch batch) {
+        connectedConfig = batch;
     }
 
     public String getDeviceType() {
@@ -230,14 +244,22 @@ public class BTActivity extends AppCompatActivity
         }
     }
 
-    private void reloadOpenConfig() {
-        if (!"config".equals(currentFragment)) {
-            return;
+    private void readConfigOnConnect() {
+        awaitingConfig = true;
+        bt.send(Modbus.CONFIG);
+    }
+
+    private boolean takeConfigReply(byte[] data) {
+        if (!awaitingConfig || Modbus.holdingValues(data, 5) == null) {
+            return false;
         }
-        Fragment found = getSupportFragmentManager().findFragmentByTag(currentFragment);
+        awaitingConfig = false;
+        connectedConfig = Modbus.RegistersFromData(data, deviceType, 10);
+        Fragment found = getSupportFragmentManager().findFragmentByTag("config");
         if (found instanceof ConfigFragment) {
-            ((ConfigFragment) found).reload();
+            ((ConfigFragment) found).showRegisters(connectedConfig);
         }
+        return true;
     }
 
     private void reloadOpenCalibration() {
@@ -345,6 +367,7 @@ public class BTActivity extends AppCompatActivity
                 connectedTo.setVisibility(View.VISIBLE);
                 device.setText("Подключить");
                 status.setText("Нет подключения");
+                awaitingConfig = false;
                 setMenuGroupEnabled(false);
             }
 
@@ -352,6 +375,7 @@ public class BTActivity extends AppCompatActivity
                 connectedTo.setVisibility(View.VISIBLE);
                 device.setText("Подключить");
                 status.setText("Не удалось подключиться");
+                awaitingConfig = false;
                 setMenuGroupEnabled(false);
             }
 
@@ -360,7 +384,7 @@ public class BTActivity extends AppCompatActivity
                 device.setText(name);
                 status.setText("Подключено");
                 setMenuGroupEnabled(true);
-                reloadOpenConfig();
+                readConfigOnConnect();
             }
         });
         //Обработчик принятных данных
@@ -377,6 +401,9 @@ public class BTActivity extends AppCompatActivity
                         }
                         return;
                     }
+                }
+                if (takeConfigReply(data)) {
+                    return;
                 }
                 if (gonnaBeSaved) {
                     RegisterBatch registerBatch = Modbus.RegistersFromData(data, deviceType, 0);
