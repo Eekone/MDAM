@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 //ToDo: Implement/use trird-party Modbus library instead of hardcoded commands
@@ -153,6 +154,23 @@ public class Modbus {
             return raw / 10f;
         }
         return raw & 0xFFFF;
+    }
+
+    /**
+     * Экран «Значения» БКМ1: регистр хранит сотые доли.
+     * Защитный и поляризационный потенциалы показываются со знаком минус.
+     */
+    public static void applyBkm1ValueScale(List<Register> registers) {
+        if (registers == null) {
+            return;
+        }
+        for (Register register : registers) {
+            float scaled = register.getValue() * 0.01f;
+            if (register.getNumber() == 0 || register.getNumber() == 1) {
+                scaled = -Math.abs(scaled);
+            }
+            register.setValue(scaled);
+        }
     }
 
     private static String unitOf(String type, Register register, String rawName) {

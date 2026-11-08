@@ -1,8 +1,11 @@
 package com.texnoprom.mdam;
 
+import com.texnoprom.mdam.models.Register;
 import com.texnoprom.mdam.utils.Modbus;
 
 import org.junit.Test;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -82,6 +85,17 @@ public class BKM1CommandTest {
         assertEquals(94, Modbus.holdingValues(read, 1)[0]);
         assertNull(Modbus.holdingValues(read, 15));
         assertNull(Modbus.holdingValues(Modbus.MEASURE, 15));
+    }
+
+    @Test
+    public void bkm1Values_scaleByHundredthAndShareNegativePolarity() {
+        Register protective = new Register(3, 0, "Потенциал защитный", 850);
+        Register polarization = new Register(3, 1, "Поляризационный потенциал", 1050);
+        Register current = new Register(3, 3, "Ток в трубопроводе", 250);
+        Modbus.applyBkm1ValueScale(Arrays.asList(protective, polarization, current));
+        assertEquals(-8.5f, protective.getValue(), 0.001f);
+        assertEquals(-10.5f, polarization.getValue(), 0.001f);
+        assertEquals(2.5f, current.getValue(), 0.001f);
     }
 
     @Test

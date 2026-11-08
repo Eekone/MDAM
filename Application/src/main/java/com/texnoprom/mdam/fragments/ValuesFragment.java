@@ -54,6 +54,9 @@ public class ValuesFragment extends Fragment {
         if (data[1] == 3) {
             srl.setRefreshing(false);
             registerBatch = Modbus.RegistersFromData(data, deviceType, 0);
+            if ("БКМ1".equals(deviceType)) {
+                Modbus.applyBkm1ValueScale(registerBatch.getRegisters());
+            }
             RegisterAdapter adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
             listView.setAdapter(adapter);
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
