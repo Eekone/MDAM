@@ -64,6 +64,10 @@ public class BTActivity extends AppCompatActivity
         bt.send(data);
     }
 
+    public boolean isConnected() {
+        return bt != null && bt.getServiceState() == BluetoothState.STATE_CONNECTED;
+    }
+
     public String getDeviceType() {
         return deviceType;
     }
@@ -220,6 +224,20 @@ public class BTActivity extends AppCompatActivity
             menuNav.setGroupEnabled(R.id.nav_functions, enabled);
         } catch (Throwable ignored) {
         }
+        MenuItem config = menuNav.findItem(R.id.nav_read_config);
+        if (config != null) {
+            config.setEnabled(true);
+        }
+    }
+
+    private void reloadOpenConfig() {
+        if (!"config".equals(currentFragment)) {
+            return;
+        }
+        Fragment found = getSupportFragmentManager().findFragmentByTag(currentFragment);
+        if (found instanceof ConfigFragment) {
+            ((ConfigFragment) found).reload();
+        }
     }
 
     private void reloadOpenCalibration() {
@@ -342,6 +360,7 @@ public class BTActivity extends AppCompatActivity
                 device.setText(name);
                 status.setText("Подключено");
                 setMenuGroupEnabled(true);
+                reloadOpenConfig();
             }
         });
         //Обработчик принятных данных

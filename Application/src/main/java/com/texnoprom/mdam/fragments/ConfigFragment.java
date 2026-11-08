@@ -35,7 +35,7 @@ public class ConfigFragment extends Fragment {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        ((BTActivity) getActivity()).sen(Modbus.CONFIG);
+                        requestConfig();
                     }
                 }
         );
@@ -45,8 +45,26 @@ public class ConfigFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ((BTActivity) getActivity()).sen(Modbus.CONFIG);
+        requestConfig();
         getActivity().setTitle("Конфигурация");
+    }
+
+    public void reload() {
+        requestConfig();
+    }
+
+    private void requestConfig() {
+        if (!(getActivity() instanceof BTActivity)) {
+            return;
+        }
+        BTActivity activity = (BTActivity) getActivity();
+        if (!activity.isConnected()) {
+            if (srl != null) {
+                srl.setRefreshing(false);
+            }
+            return;
+        }
+        activity.sen(Modbus.CONFIG);
     }
 
     public void handleInputData(byte[] data, String deviceType) {
