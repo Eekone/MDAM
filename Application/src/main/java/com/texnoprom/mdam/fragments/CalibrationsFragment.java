@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.activities.BTActivity;
 import com.texnoprom.mdam.adapters.RegisterAdapter;
+import com.texnoprom.mdam.models.Register;
 import com.texnoprom.mdam.models.RegisterBatch;
 import com.texnoprom.mdam.utils.Modbus;
 
@@ -28,6 +29,9 @@ public class CalibrationsFragment extends Fragment {
     ListView listView;
     int position = 0, top;
     SwipeRefreshLayout srl;
+    private int expectedStart = -1;
+    private int expectedCount = 0;
+    private int pendingWrite = -1;
 
     @Nullable
     @Override
@@ -39,65 +43,114 @@ public class CalibrationsFragment extends Fragment {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        ((BTActivity) getActivity()).sen(calibrationCommand());
+                        readCalibrationBlock();
                     }
                 }
         );
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> arg0, View arg1, final int arg2, long arg3) {
+                if (registerBatch == null || arg2 < 0 || arg2 >= registerBatch.getRegisters().size()) {
+                    return;
+                }
+                final int registerAddress = registerBatch.getRegisters().get(arg2).getNumber();
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle("Введите значение:");
+                builder.setMessage("Целое число этого регистра");
+                final EditText input = new EditText(getActivity());
+                input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                builder.setView(input);
+                builder.setPositiveButton("Ввод", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String raw = input.getText().toString().trim();
+                        if (raw.length() == 0) {
+                            Toast.makeText(getActivity(), "Введите число", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        try {
+                            int value = Integer.parseInt(raw);
+                            pendingWrite = registerAddress;
+                            expectedCount = 0;
+                            ((BTActivity) getActivity()).sen(Modbus.presetRegister(1, registerAddress, value));
+                        } catch (NumberFormatException e) {
+                            Toast.makeText(getActivity(), "Введите число", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+                builder.setNegativeButton("Назад", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
+            }
+        });
         return view;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ((BTActivity) getActivity()).sen(calibrationCommand());
+        readCalibrationBlock();
         getActivity().setTitle("Калибровки");
     }
 
-    public void handleInputData(byte[] data, String deviceType) {
-        if (data[1] == 3) {
-            srl.setRefreshing(false);
-            registerBatch = Modbus.RegistersFromData(data, deviceType, calibrationOrigin());
-            RegisterAdapter adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
-            listView.setAdapter(adapter);
-            listView.setSelectionFromTop(position, top);
+    public void cancelPendingRead() {
+        expectedCount = 0;
+        pendingWrite = -1;
+    }
 
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                public void onItemClick(AdapterView<?> arg0, View arg1, final int arg2, long arg3) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setTitle("Введите значение:");
-                    builder.setMessage("От 1 до 2");
-                    final EditText input = new EditText(getActivity());
-                    input.setInputType(InputType.TYPE_CLASS_NUMBER);
-                    builder.setView(input);
-                    builder.setPositiveButton("Ввод", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            String raw = input.getText().toString().trim();
-                            if (raw.length() == 0) {
-                                Toast.makeText(getActivity(), "Введите число", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-                            try {
-                                ((BTActivity) getActivity()).sen(Modbus.presetRegister(1,
-                                        registerBatch.getRegisters().get(0).getNumber() + arg2,
-                                        Integer.parseInt(raw)));
-                            } catch (NumberFormatException e) {
-                                Toast.makeText(getActivity(), "Введите число", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-                    builder.setNegativeButton("Назад", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    });
-                    builder.show();
-                }
-            });
-        } else {
+    public void handleInputData(byte[] data, String deviceType) {
+        if (srl != null) {
             srl.setRefreshing(false);
         }
+        if (data == null || data.length < 2 || getActivity() == null) {
+            return;
+        }
+        if ((data[1] & 0xFF) == 6 && pendingWrite >= 0) {
+            int[] written = Modbus.writtenRegister(data);
+            if (written != null && written[0] == pendingWrite) {
+                int address = pendingWrite;
+                pendingWrite = -1;
+                expectedStart = address;
+                expectedCount = 1;
+                ((BTActivity) getActivity()).sen(Modbus.readHolding(address, 1));
+            }
+            return;
+        }
+        if ((data[1] & 0xFF) != 3 || Modbus.holdingValues(data, expectedCount) == null) {
+            return;
+        }
+        if (expectedCount == 1 && registerBatch != null) {
+            RegisterBatch one = Modbus.RegistersFromData(data, deviceType, expectedStart);
+            if (!one.getRegisters().isEmpty()) {
+                Register fresh = one.getRegisters().get(0);
+                for (Register row : registerBatch.getRegisters()) {
+                    if (row.getNumber() == fresh.getNumber()) {
+                        row.setValue(fresh.getValue());
+                        break;
+                    }
+                }
+                showRegisters();
+            }
+        } else {
+            registerBatch = Modbus.RegistersFromData(data, deviceType, expectedStart);
+            showRegisters();
+        }
+        expectedCount = 0;
+    }
+
+    private void readCalibrationBlock() {
+        pendingWrite = -1;
+        expectedStart = calibrationOrigin();
+        expectedCount = calibrationCount();
+        ((BTActivity) getActivity()).sen(calibrationCommand());
+    }
+
+    private void showRegisters() {
+        listView.setAdapter(new RegisterAdapter(registerBatch.getRegisters(), getActivity()));
+        listView.setSelectionFromTop(position, top);
     }
 
     private byte[] calibrationCommand() {
@@ -109,6 +162,10 @@ public class CalibrationsFragment extends Fragment {
 
     private int calibrationOrigin() {
         return isBkm4() ? 0 : 15;
+    }
+
+    private int calibrationCount() {
+        return isBkm4() ? 32 : 15;
     }
 
     private boolean isBkm4() {

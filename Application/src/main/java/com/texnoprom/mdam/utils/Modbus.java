@@ -50,6 +50,33 @@ public class Modbus {
         return command;
     }
 
+    /** Ответ функции 3 ровно на expectedCount регистров. Чужой кадр, включая команду измерения, даёт null. */
+    public static short[] holdingValues(byte[] data, int expectedCount) {
+        if (data == null || expectedCount <= 0 || data.length < 5 || (data[1] & 0xFF) != 3) {
+            return null;
+        }
+        int byteCount = data[2] & 0xFF;
+        if (byteCount != expectedCount * 2 || data.length < byteCount + 5) {
+            return null;
+        }
+        short[] values = new short[expectedCount];
+        ByteBuffer buffer = ByteBuffer.wrap(data, 3, byteCount);
+        for (int i = 0; i < expectedCount; i++) {
+            values[i] = buffer.getShort();
+        }
+        return values;
+    }
+
+    /** Ответ функции 6: адрес регистра и записанное значение. */
+    public static int[] writtenRegister(byte[] data) {
+        if (data == null || data.length < 6 || (data[1] & 0xFF) != 6) {
+            return null;
+        }
+        int address = ((data[2] & 0xFF) << 8) | (data[3] & 0xFF);
+        int value = ((data[4] & 0xFF) << 8) | (data[5] & 0xFF);
+        return new int[]{address, value};
+    }
+
     public static byte[] presetRegister(int slaveAddress, int registerAddress, int value) {
         byte[] command = new byte[8];
         command[0] = (byte) slaveAddress;

@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 //TODO: Rework according to Modbus changes
 public class BKM1CommandTest {
@@ -57,6 +58,30 @@ public class BKM1CommandTest {
     public void bkm4Channels_includeFirstTwelveReadings() {
         assertArrayEquals(Modbus.readHolding(0, 12), Modbus.BKM4_VALUES);
         assertArrayEquals(Modbus.readHolding(0, 32), Modbus.BKM4_CHANNELS);
+    }
+
+    @Test
+    public void calibrationWrite_isReadBackFromTheSameRegister() {
+        byte[] write = Modbus.presetRegister(1, 16, 94);
+        assertEquals(6, write[1]);
+        assertEquals(0, write[2]);
+        assertEquals(16, write[3]);
+        assertEquals(0, write[4]);
+        assertEquals(94, write[5] & 0xFF);
+        byte[] crc = Modbus.ModRTU_CRC(new byte[]{1, 6, 0, 16, 0, 94});
+        assertEquals(crc[0], write[6]);
+        assertEquals(crc[1], write[7]);
+
+        int[] echoed = Modbus.writtenRegister(write);
+        assertEquals(16, echoed[0]);
+        assertEquals(94, echoed[1]);
+
+        byte[] body = new byte[]{1, 3, 2, 0, 94};
+        byte[] readCrc = Modbus.ModRTU_CRC(body);
+        byte[] read = new byte[]{1, 3, 2, 0, 94, readCrc[0], readCrc[1]};
+        assertEquals(94, Modbus.holdingValues(read, 1)[0]);
+        assertNull(Modbus.holdingValues(read, 15));
+        assertNull(Modbus.holdingValues(Modbus.MEASURE, 15));
     }
 
     @Test

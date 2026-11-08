@@ -140,6 +140,7 @@ public class BTActivity extends AppCompatActivity
         try {
             switch (item.getItemId()) {
                 case R.id.nav_measure:
+                    cancelCalibrationRead();
                     bt.send(Modbus.MEASURE);
                     break;
                 default:
@@ -212,6 +213,16 @@ public class BTActivity extends AppCompatActivity
         try {
             menuNav.setGroupEnabled(R.id.nav_functions, enabled);
         } catch (Throwable ignored) {
+        }
+    }
+
+    private void cancelCalibrationRead() {
+        if (!"calibration".equals(currentFragment)) {
+            return;
+        }
+        Fragment found = getSupportFragmentManager().findFragmentByTag(currentFragment);
+        if (found instanceof CalibrationsFragment) {
+            ((CalibrationsFragment) found).cancelPendingRead();
         }
     }
 
