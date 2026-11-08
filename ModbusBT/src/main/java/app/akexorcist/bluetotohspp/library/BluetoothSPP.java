@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
@@ -38,6 +39,16 @@ public class BluetoothSPP {
     private boolean isAutoConnectionEnabled = false;
     private boolean isConnected = false;
     private boolean isConnecting = false;
+    private final Handler serviceHandler = new Handler(Looper.getMainLooper());
+    private final Runnable delayedStop = new Runnable() {
+        @Override
+        public void run() {
+            if (mChatService != null) {
+                isServiceRunning = false;
+                mChatService.stop();
+            }
+        }
+    };
     private boolean isServiceRunning = false;
 
     private String keyword = "";
@@ -79,27 +90,35 @@ public class BluetoothSPP {
                 case BluetoothState.MESSAGE_STATE_CHANGE:
                     if (mBluetoothStateListener != null)
                         mBluetoothStateListener.onServiceStateChanged(msg.arg1);
-                    if (isConnected && msg.arg1 == BluetoothState.STATE_NONE) {
-                        if (mBluetoothConnectionListener != null)
-                            mBluetoothConnectionListener.onDeviceDisconnected();
-                        if (isAutoConnectionEnabled) {
-                            isAutoConnectionEnabled = false;
-                            autoConnect(keyword);
-                        }
-                        isConnected = false;
-                        mDeviceName = null;
-                        mDeviceAddress = null;
-                    }
-
-                    if (!isConnecting && msg.arg1 == BluetoothState.STATE_CONNECTING) {
-                        isConnecting = true;
-                    } else if (isConnecting) {
-                        if (msg.arg1 != BluetoothState.STATE_CONNECTED) {
-                            if (mBluetoothConnectionListener != null)
-                                mBluetoothConnectionListener.onDeviceConnectionFailed();
-                            isConnected = false;
-                        }
+                    if (msg.arg1 == BluetoothState.STATE_CONNECTED) {
                         isConnecting = false;
+                        isConnected = true;
+                    } else if (msg.arg1 == BluetoothState.STATE_CONNECTING) {
+                        isConnecting = true;
+                        if (isConnected) {
+                            isConnected = false;
+                            if (mBluetoothConnectionListener != null) {
+                                mBluetoothConnectionListener.onDeviceDisconnected();
+                            }
+                        }
+                    } else if (msg.arg1 == BluetoothState.STATE_NONE
+                            || msg.arg1 == BluetoothState.STATE_LISTEN) {
+                        boolean wasConnected = isConnected;
+                        boolean wasConnecting = isConnecting;
+                        isConnected = false;
+                        isConnecting = false;
+                        if (wasConnected) {
+                            if (mBluetoothConnectionListener != null)
+                                mBluetoothConnectionListener.onDeviceDisconnected();
+                            if (isAutoConnectionEnabled) {
+                                isAutoConnectionEnabled = false;
+                                autoConnect(keyword);
+                            }
+                            mDeviceName = null;
+                            mDeviceAddress = null;
+                        } else if (wasConnecting && mBluetoothConnectionListener != null) {
+                            mBluetoothConnectionListener.onDeviceConnectionFailed();
+                        }
                     }
                     break;
             }
@@ -165,6 +184,7 @@ public class BluetoothSPP {
     }
 
     public void startService() {
+        serviceHandler.removeCallbacks(delayedStop);
         if (mChatService != null) {
             if (mChatService.getState() == BluetoothState.STATE_NONE) {
                 isServiceRunning = true;
@@ -178,14 +198,8 @@ public class BluetoothSPP {
             isServiceRunning = false;
             mChatService.stop();
         }
-        new Handler().postDelayed(new Runnable() {
-            public void run() {
-                if (mChatService != null) {
-                    isServiceRunning = false;
-                    mChatService.stop();
-                }
-            }
-        }, 500);
+        serviceHandler.removeCallbacks(delayedStop);
+        serviceHandler.postDelayed(delayedStop, 500);
     }
 
     public void setDeviceTarget() {
@@ -198,12 +212,14 @@ public class BluetoothSPP {
     }
 
     public void connect(Intent data) {
+        serviceHandler.removeCallbacks(delayedStop);
         String address =/*"98:D3:31:FB:58:25";*/ data.getExtras().getString(BluetoothState.EXTRA_DEVICE_ADDRESS);
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
         mChatService.connect(device);
     }
 
     public void connect(String address) {
+        serviceHandler.removeCallbacks(delayedStop);
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
         mChatService.connect(device);
     }

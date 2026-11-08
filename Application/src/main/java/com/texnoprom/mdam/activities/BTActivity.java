@@ -59,9 +59,79 @@ public class BTActivity extends AppCompatActivity
     ApiHelper apiHelper = new ApiHelper();
     boolean gonnaBeSaved = false;
     private final Bkm1MeasureGuard measureGuard = new Bkm1MeasureGuard();
+    private boolean awaitingConfig;
+    private boolean holdForConfig;
+    private boolean retriedOpenScreen;
+    private byte[] inflight;
+    private byte[] queued;
+    private RegisterBatch connectedConfig;
+    private final Handler exchange = new Handler(Looper.getMainLooper());
+    private final Runnable connectRead = new Runnable() {
+        @Override
+        public void run() {
+            beginSessionReads();
+        }
+    };
+    private final Runnable exchangeTimeout = new Runnable() {
+        @Override
+        public void run() {
+            inflight = null;
+            awaitingConfig = false;
+            holdForConfig = false;
+            if (queued == null && !retriedOpenScreen) {
+                retriedOpenScreen = true;
+                queued = commandForOpenScreen();
+            }
+            sendQueued();
+        }
+    };
 
     public void sen(byte[] data) {
+        if (data == null || !isConnected()) {
+            return;
+        }
+        if (holdForConfig || inflight != null) {
+            queued = data;
+            return;
+        }
+        startSend(data);
+    }
+
+    private void startSend(byte[] data) {
+        inflight = data;
+        exchange.removeCallbacks(exchangeTimeout);
+        exchange.postDelayed(exchangeTimeout, 2000);
         bt.send(data);
+    }
+
+    private void sendQueued() {
+        if (holdForConfig || inflight != null || queued == null || !isConnected()) {
+            return;
+        }
+        byte[] next = queued;
+        queued = null;
+        startSend(next);
+    }
+
+    private void noteReply() {
+        exchange.removeCallbacks(exchangeTimeout);
+        inflight = null;
+    }
+
+    public boolean isConnected() {
+        return bt != null && bt.getServiceState() == BluetoothState.STATE_CONNECTED;
+    }
+
+    public RegisterBatch connectedConfig() {
+        return connectedConfig;
+    }
+
+    public boolean isConfigReadPending() {
+        return awaitingConfig;
+    }
+
+    public void rememberConfig(RegisterBatch batch) {
+        connectedConfig = batch;
     }
 
     public String getDeviceType() {
@@ -144,9 +214,9 @@ public class BTActivity extends AppCompatActivity
                 case R.id.nav_measure:
                     cancelCalibrationRead();
                     if ("БКМ1".equals(deviceType)) {
-                        bt.send(measureGuard.begin());
+                        sen(measureGuard.begin());
                     } else {
-                        bt.send(Modbus.MEASURE);
+                        sen(Modbus.MEASURE);
                     }
                     break;
                 default:
@@ -220,6 +290,122 @@ public class BTActivity extends AppCompatActivity
             menuNav.setGroupEnabled(R.id.nav_functions, enabled);
         } catch (Throwable ignored) {
         }
+        MenuItem config = menuNav.findItem(R.id.nav_read_config);
+        if (config != null) {
+            config.setEnabled(true);
+        }
+    }
+
+    private void resetExchange() {
+        awaitingConfig = false;
+        holdForConfig = false;
+        retriedOpenScreen = false;
+        inflight = null;
+        queued = null;
+        gonnaBeSaved = false;
+        exchange.removeCallbacks(connectRead);
+        exchange.removeCallbacks(exchangeTimeout);
+        measureGuard.cancel();
+        cancelCalibrationRead();
+    }
+
+    private void readConfigOnConnect() {
+        connectedConfig = null;
+        awaitingConfig = true;
+        holdForConfig = true;
+        exchange.postDelayed(connectRead, 400);
+    }
+
+    private void beginSessionReads() {
+        holdForConfig = false;
+        if (!isConnected()) {
+            awaitingConfig = false;
+            return;
+        }
+        if (queued == null) {
+            byte[] screen = commandForOpenScreen();
+            if (screen != null && screen != Modbus.CONFIG) {
+                queued = screen;
+            }
+        }
+        awaitingConfig = true;
+        startSend(Modbus.CONFIG);
+    }
+
+    private byte[] commandForOpenScreen() {
+        if ("values".equals(currentFragment)) {
+            return "БКМ4".equals(deviceType) ? Modbus.BKM4_VALUES : Modbus.VALUES;
+        }
+        if ("calibration".equals(currentFragment)) {
+            return "БКМ4".equals(deviceType) ? Modbus.BKM4_CHANNELS : Modbus.CALIBRATIONS;
+        }
+        if ("config".equals(currentFragment)) {
+            return Modbus.CONFIG;
+        }
+        if ("misc".equals(currentFragment)) {
+            return Modbus.MISC;
+        }
+        return null;
+    }
+
+    private void dispatchInput(byte[] data) {
+        if (measureGuard.isBusy()) {
+            byte[] next = measureGuard.accept(data);
+            if (measureGuard.consumed()) {
+                if (next != null) {
+                    sen(next);
+                }
+                if (measureGuard.finished()) {
+                    reloadOpenCalibration();
+                }
+                return;
+            }
+        }
+        if (takeConfigReply(data)) {
+            return;
+        }
+        if (gonnaBeSaved) {
+            RegisterBatch registerBatch = Modbus.RegistersFromData(data, deviceType, 0);
+            apiHelper.postRegisters(registerBatch, postRegistersCallback);
+            gonnaBeSaved = false;
+            return;
+        }
+        if (currentFragment == null || data == null || data.length < 2) {
+            return;
+        }
+        Fragment found = getSupportFragmentManager().findFragmentByTag(currentFragment);
+        if (found == null) {
+            return;
+        }
+        switch (currentFragment) {
+            case "values":
+                ((ValuesFragment) found).handleInputData(data, deviceType);
+                break;
+            case "config":
+                ((ConfigFragment) found).handleInputData(data, deviceType);
+                break;
+            case "calibration":
+                ((CalibrationsFragment) found).handleInputData(data, deviceType);
+                break;
+            case "misc":
+                ((MiscFragment) found).handleInputData(data, deviceType);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private boolean takeConfigReply(byte[] data) {
+        if (!awaitingConfig || Modbus.holdingValues(data, 5) == null) {
+            return false;
+        }
+        awaitingConfig = false;
+        connectedConfig = Modbus.RegistersFromData(data, deviceType, 10);
+        Fragment found = getSupportFragmentManager().findFragmentByTag("config");
+        if (found instanceof ConfigFragment) {
+            ((ConfigFragment) found).showRegisters(connectedConfig);
+        }
+        return true;
     }
 
     private void reloadOpenCalibration() {
@@ -307,6 +493,7 @@ public class BTActivity extends AppCompatActivity
         header.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                resetExchange();
                 bt.setDeviceTarget();
                 Context c = getApplicationContext();
                 Intent intent = new Intent(c, BTDevicesActivity.class);
@@ -327,6 +514,7 @@ public class BTActivity extends AppCompatActivity
                 connectedTo.setVisibility(View.VISIBLE);
                 device.setText("Подключить");
                 status.setText("Нет подключения");
+                resetExchange();
                 setMenuGroupEnabled(false);
             }
 
@@ -334,6 +522,7 @@ public class BTActivity extends AppCompatActivity
                 connectedTo.setVisibility(View.VISIBLE);
                 device.setText("Подключить");
                 status.setText("Не удалось подключиться");
+                resetExchange();
                 setMenuGroupEnabled(false);
             }
 
@@ -341,50 +530,20 @@ public class BTActivity extends AppCompatActivity
                 connectedTo.setVisibility(View.GONE);
                 device.setText(name);
                 status.setText("Подключено");
+                resetExchange();
                 setMenuGroupEnabled(true);
+                readConfigOnConnect();
             }
         });
         //Обработчик принятных данных
         bt.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
             public void onDataReceived(byte[] data, String message) {
-                if (measureGuard.isBusy()) {
-                    byte[] next = measureGuard.accept(data);
-                    if (measureGuard.consumed()) {
-                        if (next != null) {
-                            bt.send(next);
-                        }
-                        if (measureGuard.finished()) {
-                            reloadOpenCalibration();
-                        }
-                        return;
-                    }
-                }
-                if (gonnaBeSaved) {
-                    RegisterBatch registerBatch = Modbus.RegistersFromData(data, deviceType, 0);
-                    apiHelper.postRegisters(registerBatch, postRegistersCallback);
-                    gonnaBeSaved = false;
-                } else {
-                    if (currentFragment == null) {
-                        return;
-                    }
-                    FragmentManager fm = getSupportFragmentManager();
-                    Fragment found = fm.findFragmentByTag(currentFragment);
-                    if (found == null || data == null || data.length < 2) {
-                        return;
-                    }
-                    switch (currentFragment) {
-                        case "values":
-                            ((ValuesFragment) found).handleInputData(data, deviceType);
-                            break;
-                        case "config":
-                            ((ConfigFragment) found).handleInputData(data, deviceType);
-                            break;
-                        case "calibration":
-                            ((CalibrationsFragment) found).handleInputData(data, deviceType);
-                            break;
-                        case "misc":
-                            ((MiscFragment) found).handleInputData(data, deviceType);
-                            break;
+                noteReply();
+                try {
+                    dispatchInput(data);
+                } finally {
+                    if (inflight == null) {
+                        sendQueued();
                     }
                 }
             }

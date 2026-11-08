@@ -35,7 +35,7 @@ public class ConfigFragment extends Fragment {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        ((BTActivity) getActivity()).sen(Modbus.CONFIG);
+                        requestConfig();
                     }
                 }
         );
@@ -45,29 +45,59 @@ public class ConfigFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ((BTActivity) getActivity()).sen(Modbus.CONFIG);
+        BTActivity activity = (BTActivity) getActivity();
+        if (activity.connectedConfig() != null) {
+            showRegisters(activity.connectedConfig());
+        } else if (!activity.isConfigReadPending()) {
+            requestConfig();
+        }
         getActivity().setTitle("Конфигурация");
     }
 
-    public void handleInputData(byte[] data, String deviceType) {
-        if (data[1] == 3) {
+    public void showRegisters(RegisterBatch batch) {
+        if (srl != null) {
             srl.setRefreshing(false);
-            registerBatch = Modbus.RegistersFromData(data, deviceType, 10);
-            RegisterAdapter adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
-            listView.setAdapter(adapter);
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                public void onItemClick(AdapterView<?> arg0, View arg1, final int arg2, long arg3) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setTitle("Ввод конфигураций недоступен");
-                    builder.setPositiveButton("Ок", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                        }
-                    });
-                    builder.show();
-                }
-            });
-        } else {
+        }
+        if (batch == null || getActivity() == null || listView == null) {
+            return;
+        }
+        registerBatch = batch;
+        if (getActivity() instanceof BTActivity) {
+            ((BTActivity) getActivity()).rememberConfig(batch);
+        }
+        listView.setAdapter(new RegisterAdapter(batch.getRegisters(), getActivity()));
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> arg0, View arg1, final int arg2, long arg3) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle("Ввод конфигураций недоступен");
+                builder.setPositiveButton("Ок", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                builder.show();
+            }
+        });
+    }
+
+    private void requestConfig() {
+        if (!(getActivity() instanceof BTActivity)) {
+            return;
+        }
+        BTActivity activity = (BTActivity) getActivity();
+        if (!activity.isConnected()) {
+            if (srl != null) {
+                srl.setRefreshing(false);
+            }
+            return;
+        }
+        activity.sen(Modbus.CONFIG);
+    }
+
+    public void handleInputData(byte[] data, String deviceType) {
+        if (data != null && data.length > 2 && (data[1] & 0xFF) == 3 && Modbus.holdingValues(data, 5) != null) {
+            showRegisters(Modbus.RegistersFromData(data, deviceType, 10));
+        } else if (srl != null) {
             srl.setRefreshing(false);
         }
     }
