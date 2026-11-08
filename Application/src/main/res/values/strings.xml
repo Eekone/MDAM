@@ -37,7 +37,7 @@
 
     <!-- BRegisterster Titles -->
     <string-array name="BKM1_3_titles">
-        <item>Потенциал</item>
+        <item>Потенциал защитный</item>
         <item>Поляризационный потенциал</item>
         <item>Кислотность грунта</item>
         <item>Ток в трубопроводе</item>

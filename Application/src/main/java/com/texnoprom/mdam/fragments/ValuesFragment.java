@@ -36,7 +36,7 @@ public class ValuesFragment extends Fragment {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        ((BTActivity) getActivity()).sen(Modbus.VALUES);
+                        ((BTActivity) getActivity()).sen(valuesCommand());
                     }
                 }
         );
@@ -46,7 +46,7 @@ public class ValuesFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ((BTActivity) getActivity()).sen(Modbus.VALUES);
+        ((BTActivity) getActivity()).sen(valuesCommand());
         getActivity().setTitle("Значения");
     }
 
@@ -54,6 +54,9 @@ public class ValuesFragment extends Fragment {
         if (data[1] == 3) {
             srl.setRefreshing(false);
             registerBatch = Modbus.RegistersFromData(data, deviceType, 0);
+            if ("БКМ1".equals(deviceType)) {
+                Modbus.applyBkm1ValueScale(registerBatch.getRegisters());
+            }
             RegisterAdapter adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
             listView.setAdapter(adapter);
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -69,8 +72,16 @@ public class ValuesFragment extends Fragment {
                 }
             });
         } else {
-            ((BTActivity) getActivity()).sen(Modbus.VALUES);
+            srl.setRefreshing(false);
         }
+    }
+
+    private byte[] valuesCommand() {
+        if (getActivity() instanceof BTActivity
+                && "БКМ4".equals(((BTActivity) getActivity()).getDeviceType())) {
+            return Modbus.BKM4_VALUES;
+        }
+        return Modbus.VALUES;
     }
 }
 

@@ -10,11 +10,21 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 //ToDo: Implement/use trird-party Modbus library instead of hardcoded commands
 public class Modbus {
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.getDefault());
+    // yyyy is the calendar year. YYYY is the week-year and is rejected by
+    // SimpleDateFormat before Android 7, which leaves this class unloadable.
+    private static SimpleDateFormat dateFormat;
+
+    private static SimpleDateFormat dateFormat() {
+        if (dateFormat == null) {
+            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+        }
+        return dateFormat;
+    }
 
     public static byte[] MEASURE = {1, 5, 0, 5, -1, 0, (byte) 156, 59};
     public static byte[] VALUES = {1, 3, 0, 0, 0, 10, (byte) 197, (byte) 205};
@@ -22,6 +32,51 @@ public class Modbus {
     public static byte[] ALL = {1, 3, 0, 0, 0, 41, (byte) 132, 20};
     public static byte[] CALIBRATIONS = {1, 3, 0, 15, 0, 15, (byte) 53, (byte) 205};
     public static byte[] MISC = {1, 3, 0, 30, 0, 11, (byte) 100, 11};
+    /** Первые 12 измеряемых величин БКМ4. */
+    public static byte[] BKM4_VALUES = readHolding(0, 12);
+    /** Те же 12 величин, затем токи 1–8 и сопротивления 1–12. */
+    public static byte[] BKM4_CHANNELS = readHolding(0, 32);
+
+    public static byte[] readHolding(int start, int count) {
+        byte[] command = new byte[8];
+        command[0] = 1;
+        command[1] = 3;
+        command[2] = (byte) ((start >> 8) & 0xFF);
+        command[3] = (byte) (start & 0xFF);
+        command[4] = (byte) ((count >> 8) & 0xFF);
+        command[5] = (byte) (count & 0xFF);
+        byte[] crc = ModRTU_CRC(Arrays.copyOf(command, 6));
+        command[6] = crc[0];
+        command[7] = crc[1];
+        return command;
+    }
+
+    /** Ответ функции 3 ровно на expectedCount регистров. Чужой кадр, включая команду измерения, даёт null. */
+    public static short[] holdingValues(byte[] data, int expectedCount) {
+        if (data == null || expectedCount <= 0 || data.length < 5 || (data[1] & 0xFF) != 3) {
+            return null;
+        }
+        int byteCount = data[2] & 0xFF;
+        if (byteCount != expectedCount * 2 || data.length < byteCount + 5) {
+            return null;
+        }
+        short[] values = new short[expectedCount];
+        ByteBuffer buffer = ByteBuffer.wrap(data, 3, byteCount);
+        for (int i = 0; i < expectedCount; i++) {
+            values[i] = buffer.getShort();
+        }
+        return values;
+    }
+
+    /** Ответ функции 6: адрес регистра и записанное значение. */
+    public static int[] writtenRegister(byte[] data) {
+        if (data == null || data.length < 6 || (data[1] & 0xFF) != 6) {
+            return null;
+        }
+        int address = ((data[2] & 0xFF) << 8) | (data[3] & 0xFF);
+        int value = ((data[4] & 0xFF) << 8) | (data[5] & 0xFF);
+        return new int[]{address, value};
+    }
 
     public static byte[] presetRegister(int slaveAddress, int registerAddress, int value) {
         byte[] command = new byte[8];
@@ -67,17 +122,75 @@ public class Modbus {
 
         ArrayList<Register> registers = new ArrayList<>();
         registers.clear();
-        String date = dateFormat.format(new Date());
+        String date = dateFormat().format(new Date());
         int command = data[1];
         int number = firstRegister;
         for (int i = 3; i < data.length - 2; i = i + 2) {
             byte val[] = Arrays.copyOfRange(data, i, i + 2);
             ByteBuffer wrapped = ByteBuffer.wrap(val);
             short value = wrapped.getShort();
-            registers.add(new Register(command, number, RegisterInfo.Name(type, command, number), value));
+            String rawName = RegisterInfo.Name(type, command, number);
+            Register register = new Register(command, number, ParameterText.name(rawName),
+                    displayValue(type, rawName, value));
+            register.setUnit(unitOf(type, register, rawName));
+            registers.add(register);
             number++;
         }
         return new RegisterBatch(date, type, registers);
+    }
+
+    /**
+     * БКМ4 хранит «00.00» в сотых, «00.0» в десятых. Остальные регистры — целые без знака.
+     * Отрицательный потенциал остаётся отрицательным.
+     */
+    public static float displayValue(String type, String name, short raw) {
+        if (!"БКМ4".equals(type) || name == null) {
+            return raw;
+        }
+        if (name.contains("00.00")) {
+            return raw / 100f;
+        }
+        if (name.contains("00.0")) {
+            return raw / 10f;
+        }
+        return raw & 0xFFFF;
+    }
+
+    /**
+     * Экран «Значения» БКМ1. Номер строки на экране на 1 больше адреса регистра.
+     * [1]–[3] хранят сотые, знак как в модуле.
+     * [8] температура — десятые.
+     * [9] батарея — код АЦП 0…65535 на шкале 0…1000.
+     * [4]–[7] и [10] показываются как есть.
+     */
+    public static void applyBkm1ValueScale(List<Register> registers) {
+        if (registers == null) {
+            return;
+        }
+        for (Register register : registers) {
+            int raw = Math.round(register.getValue());
+            float shown = raw;
+            int number = register.getNumber();
+            if (number >= 0 && number <= 2) {
+                shown = raw * 0.01f;
+            } else if (number == 7) {
+                shown = raw * 0.1f;
+            } else if (number == 8) {
+                shown = (raw & 0xFFFF) * 1000f / 65536f;
+            }
+            register.setValue(shown);
+        }
+    }
+
+    private static String unitOf(String type, Register register, String rawName) {
+        String fromTable = RegisterInfo.Unit(register, type);
+        if (fromTable != null) {
+            String trimmed = fromTable.trim();
+            if (trimmed.length() > 0 && !"?".equals(trimmed) && !trimmed.startsWith("No ")) {
+                return trimmed;
+            }
+        }
+        return ParameterText.unit(rawName);
     }
 
     public byte[] forceSingleCoil(byte address, short register, boolean value) {
