@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
@@ -38,6 +39,16 @@ public class BluetoothSPP {
     private boolean isAutoConnectionEnabled = false;
     private boolean isConnected = false;
     private boolean isConnecting = false;
+    private final Handler serviceHandler = new Handler(Looper.getMainLooper());
+    private final Runnable delayedStop = new Runnable() {
+        @Override
+        public void run() {
+            if (mChatService != null) {
+                isServiceRunning = false;
+                mChatService.stop();
+            }
+        }
+    };
     private boolean isServiceRunning = false;
 
     private String keyword = "";
@@ -165,6 +176,7 @@ public class BluetoothSPP {
     }
 
     public void startService() {
+        serviceHandler.removeCallbacks(delayedStop);
         if (mChatService != null) {
             if (mChatService.getState() == BluetoothState.STATE_NONE) {
                 isServiceRunning = true;
@@ -178,14 +190,8 @@ public class BluetoothSPP {
             isServiceRunning = false;
             mChatService.stop();
         }
-        new Handler().postDelayed(new Runnable() {
-            public void run() {
-                if (mChatService != null) {
-                    isServiceRunning = false;
-                    mChatService.stop();
-                }
-            }
-        }, 500);
+        serviceHandler.removeCallbacks(delayedStop);
+        serviceHandler.postDelayed(delayedStop, 500);
     }
 
     public void setDeviceTarget() {
@@ -198,12 +204,14 @@ public class BluetoothSPP {
     }
 
     public void connect(Intent data) {
+        serviceHandler.removeCallbacks(delayedStop);
         String address =/*"98:D3:31:FB:58:25";*/ data.getExtras().getString(BluetoothState.EXTRA_DEVICE_ADDRESS);
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
         mChatService.connect(device);
     }
 
     public void connect(String address) {
+        serviceHandler.removeCallbacks(delayedStop);
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
         mChatService.connect(device);
     }

@@ -244,7 +244,15 @@ public class BTActivity extends AppCompatActivity
         }
     }
 
+    private void resetExchange() {
+        awaitingConfig = false;
+        gonnaBeSaved = false;
+        measureGuard.cancel();
+        cancelCalibrationRead();
+    }
+
     private void readConfigOnConnect() {
+        connectedConfig = null;
         awaitingConfig = true;
         bt.send(Modbus.CONFIG);
     }
@@ -347,6 +355,7 @@ public class BTActivity extends AppCompatActivity
         header.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                resetExchange();
                 bt.setDeviceTarget();
                 Context c = getApplicationContext();
                 Intent intent = new Intent(c, BTDevicesActivity.class);
@@ -367,7 +376,7 @@ public class BTActivity extends AppCompatActivity
                 connectedTo.setVisibility(View.VISIBLE);
                 device.setText("Подключить");
                 status.setText("Нет подключения");
-                awaitingConfig = false;
+                resetExchange();
                 setMenuGroupEnabled(false);
             }
 
@@ -375,7 +384,7 @@ public class BTActivity extends AppCompatActivity
                 connectedTo.setVisibility(View.VISIBLE);
                 device.setText("Подключить");
                 status.setText("Не удалось подключиться");
-                awaitingConfig = false;
+                resetExchange();
                 setMenuGroupEnabled(false);
             }
 
@@ -383,6 +392,7 @@ public class BTActivity extends AppCompatActivity
                 connectedTo.setVisibility(View.GONE);
                 device.setText(name);
                 status.setText("Подключено");
+                resetExchange();
                 setMenuGroupEnabled(true);
                 readConfigOnConnect();
             }
