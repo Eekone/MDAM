@@ -144,7 +144,7 @@ public class BTActivity extends AppCompatActivity
                 case R.id.nav_measure:
                     cancelCalibrationRead();
                     if ("БКМ1".equals(deviceType)) {
-                        bt.send(measureGuard.begin(calibrationSnapshot()));
+                        bt.send(measureGuard.begin());
                     } else {
                         bt.send(Modbus.MEASURE);
                     }
@@ -220,18 +220,6 @@ public class BTActivity extends AppCompatActivity
             menuNav.setGroupEnabled(R.id.nav_functions, enabled);
         } catch (Throwable ignored) {
         }
-    }
-
-    private short[] calibrationSnapshot() {
-        if (!"calibration".equals(currentFragment)) {
-            return null;
-        }
-        Fragment found = getSupportFragmentManager().findFragmentByTag(currentFragment);
-        if (found instanceof CalibrationsFragment) {
-            return ((CalibrationsFragment) found).rawRange(
-                    Bkm1MeasureGuard.FIRST, Bkm1MeasureGuard.COUNT);
-        }
-        return null;
     }
 
     private void reloadOpenCalibration() {

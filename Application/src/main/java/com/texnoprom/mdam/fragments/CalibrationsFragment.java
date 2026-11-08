@@ -108,28 +108,6 @@ public class CalibrationsFragment extends Fragment {
         readCalibrationBlock();
     }
 
-    /** Сырые значения регистров start..start+count-1. Нет строки — null. */
-    public short[] rawRange(int start, int count) {
-        if (registerBatch == null || count <= 0) {
-            return null;
-        }
-        short[] values = new short[count];
-        for (int i = 0; i < count; i++) {
-            Register found = null;
-            for (Register row : registerBatch.getRegisters()) {
-                if (row.getNumber() == start + i) {
-                    found = row;
-                    break;
-                }
-            }
-            if (found == null) {
-                return null;
-            }
-            values[i] = (short) Math.round(found.getValue());
-        }
-        return values;
-    }
-
     public void handleInputData(byte[] data, String deviceType) {
         if (srl != null) {
             srl.setRefreshing(false);

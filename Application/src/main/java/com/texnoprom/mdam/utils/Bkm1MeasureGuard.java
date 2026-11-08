@@ -16,19 +16,13 @@ public final class Bkm1MeasureGuard {
     private boolean consumed;
     private boolean finished;
 
-    public byte[] begin(short[] known) {
-        readingSnapshot = false;
+    public byte[] begin() {
+        readingSnapshot = true;
         waitingMeasure = false;
         restoreAt = -1;
         consumed = false;
         finished = false;
-        if (known != null && known.length == COUNT) {
-            saved = known.clone();
-            waitingMeasure = true;
-            return Modbus.MEASURE;
-        }
         saved = null;
-        readingSnapshot = true;
         return Modbus.readHolding(FIRST, COUNT);
     }
 
@@ -51,12 +45,13 @@ public final class Bkm1MeasureGuard {
             return null;
         }
         if (readingSnapshot) {
-            readingSnapshot = false;
             short[] values = Modbus.holdingValues(data, COUNT);
-            if (values != null) {
-                saved = values.clone();
-                waitingMeasure = true;
+            if (values == null) {
+                return null;
             }
+            readingSnapshot = false;
+            saved = values.clone();
+            waitingMeasure = true;
             consumed = true;
             return Modbus.MEASURE;
         }

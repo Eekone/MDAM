@@ -31,10 +31,15 @@ public class Bkm1MeasureGuardTest {
         }
         known[1] = -40;
 
-        assertArrayEquals(Modbus.MEASURE, guard.begin(known));
+        assertArrayEquals(Modbus.readHolding(15, 12), guard.begin());
         assertTrue(guard.isBusy());
+        assertNull(guard.accept(Modbus.MEASURE));
+        assertFalse(guard.consumed());
 
-        byte[] firstWrite = guard.accept(Modbus.MEASURE);
+        byte[] firstWrite = guard.accept(readFrame(known));
+        assertTrue(guard.consumed());
+        assertArrayEquals(Modbus.MEASURE, firstWrite);
+        firstWrite = guard.accept(Modbus.MEASURE);
         assertTrue(guard.consumed());
         assertArrayEquals(Modbus.presetRegister(1, 15, 100), firstWrite);
 
@@ -52,20 +57,27 @@ public class Bkm1MeasureGuardTest {
     @Test
     public void withoutAVisibleList_readsTheBlockBeforeMeasuring() {
         Bkm1MeasureGuard guard = new Bkm1MeasureGuard();
-        assertArrayEquals(Modbus.readHolding(15, 12), guard.begin(null));
+        assertArrayEquals(Modbus.readHolding(15, 12), guard.begin());
 
-        byte[] body = new byte[3 + 24];
+        short[] values = new short[12];
+        values[0] = 7;
+        for (int i = 1; i < values.length; i++) {
+            values[i] = (short) (10 * i);
+        }
+
+        assertArrayEquals(Modbus.MEASURE, guard.accept(readFrame(values)));
+        assertArrayEquals(Modbus.presetRegister(1, 15, 7), guard.accept(Modbus.MEASURE));
+    }
+
+    private static byte[] readFrame(short[] values) {
+        byte[] body = new byte[3 + values.length * 2];
         body[0] = 1;
         body[1] = 3;
-        body[2] = 24;
-        ByteBuffer data = ByteBuffer.wrap(body, 3, 24);
-        data.putShort((short) 7);
-        for (int i = 1; i < 12; i++) {
-            data.putShort((short) (10 * i));
+        body[2] = (byte) (values.length * 2);
+        ByteBuffer data = ByteBuffer.wrap(body, 3, values.length * 2);
+        for (short value : values) {
+            data.putShort(value);
         }
-        byte[] frame = Arrays.copyOf(body, body.length + 2);
-
-        assertArrayEquals(Modbus.MEASURE, guard.accept(frame));
-        assertArrayEquals(Modbus.presetRegister(1, 15, 7), guard.accept(Modbus.MEASURE));
+        return Arrays.copyOf(body, body.length + 2);
     }
 }
