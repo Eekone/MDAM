@@ -90,27 +90,35 @@ public class BluetoothSPP {
                 case BluetoothState.MESSAGE_STATE_CHANGE:
                     if (mBluetoothStateListener != null)
                         mBluetoothStateListener.onServiceStateChanged(msg.arg1);
-                    if (isConnected && msg.arg1 == BluetoothState.STATE_NONE) {
-                        if (mBluetoothConnectionListener != null)
-                            mBluetoothConnectionListener.onDeviceDisconnected();
-                        if (isAutoConnectionEnabled) {
-                            isAutoConnectionEnabled = false;
-                            autoConnect(keyword);
-                        }
-                        isConnected = false;
-                        mDeviceName = null;
-                        mDeviceAddress = null;
-                    }
-
-                    if (!isConnecting && msg.arg1 == BluetoothState.STATE_CONNECTING) {
-                        isConnecting = true;
-                    } else if (isConnecting) {
-                        if (msg.arg1 != BluetoothState.STATE_CONNECTED) {
-                            if (mBluetoothConnectionListener != null)
-                                mBluetoothConnectionListener.onDeviceConnectionFailed();
-                            isConnected = false;
-                        }
+                    if (msg.arg1 == BluetoothState.STATE_CONNECTED) {
                         isConnecting = false;
+                        isConnected = true;
+                    } else if (msg.arg1 == BluetoothState.STATE_CONNECTING) {
+                        isConnecting = true;
+                        if (isConnected) {
+                            isConnected = false;
+                            if (mBluetoothConnectionListener != null) {
+                                mBluetoothConnectionListener.onDeviceDisconnected();
+                            }
+                        }
+                    } else if (msg.arg1 == BluetoothState.STATE_NONE
+                            || msg.arg1 == BluetoothState.STATE_LISTEN) {
+                        boolean wasConnected = isConnected;
+                        boolean wasConnecting = isConnecting;
+                        isConnected = false;
+                        isConnecting = false;
+                        if (wasConnected) {
+                            if (mBluetoothConnectionListener != null)
+                                mBluetoothConnectionListener.onDeviceDisconnected();
+                            if (isAutoConnectionEnabled) {
+                                isAutoConnectionEnabled = false;
+                                autoConnect(keyword);
+                            }
+                            mDeviceName = null;
+                            mDeviceAddress = null;
+                        } else if (wasConnecting && mBluetoothConnectionListener != null) {
+                            mBluetoothConnectionListener.onDeviceConnectionFailed();
+                        }
                     }
                     break;
             }

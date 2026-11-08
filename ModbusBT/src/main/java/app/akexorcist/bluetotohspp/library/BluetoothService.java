@@ -284,6 +284,7 @@ public class BluetoothService {
                 public void run() {
                     synchronized (BluetoothService.this) {
                         if (userStop || generation != reconnectGeneration) {
+                            reconnecting = false;
                             return;
                         }
                     }
