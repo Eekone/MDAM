@@ -36,48 +36,33 @@
                 android:orientation="vertical">
 
                 <Button
-                    android:id="@+id/OPE11"
+                    android:id="@+id/ptmBkm"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/ope_bg"
-                    android:text="ОПЕ-М11"
-                    android:textSize="70sp"
-                    android:typeface="sans" />
-
-                <Button
-                    android:id="@+id/OPE14"
-                    android:enabled="false"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/ope_bg"
-                    android:text="ОПЕ-М14"
-                    android:textSize="70sp"
-                    android:typeface="sans" />
-
-                <Button
-                    android:id="@+id/MMPR"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/mmpr_bg"
-                    android:text="ММПР"
-                    android:textSize="70sp"
-                    android:typeface="sans" />
-
-                <Button
-                    android:id="@+id/BKM4"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:layout_weight="1"
                     android:background="@drawable/layout_bg"
-                    android:text="БКМ4"
-                    android:textSize="70sp"
+                    android:minHeight="48dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:singleLine="true"
+                    android:text="ПТМ.БКМ-1.0"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:typeface="sans" />
+
+                <Button
+                    android:id="@+id/eltechBip"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/layout_bg"
+                    android:minHeight="48dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:singleLine="true"
+                    android:text="ЭЛТЕХ.БИП-1"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
                     android:typeface="sans" />
 
                 <Button
@@ -85,12 +70,76 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:layout_weight="1"
                     android:background="@drawable/layout_bg"
-                    android:text="БКМ1"
-                    android:textSize="70sp"
+                    android:minHeight="48dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:singleLine="true"
+                    android:text="ПВЕК.БКМ-3М"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
                     android:typeface="sans" />
 
+                <Button
+                    android:id="@+id/BKM4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/layout_bg"
+                    android:minHeight="48dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:singleLine="true"
+                    android:text="ПВЕК.БКМ-4"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:typeface="sans" />
+
+                <Button
+                    android:id="@+id/MMPR"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/mmpr_bg"
+                    android:minHeight="48dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:singleLine="true"
+                    android:text="ПВЕК.ММПР"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:typeface="sans" />
+
+                <Button
+                    android:id="@+id/OPE11"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/ope_bg"
+                    android:minHeight="48dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:singleLine="true"
+                    android:text="ЭНЕРГОМЕРА.ОПЕ-М11"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:typeface="sans" />
+
+                <Button
+                    android:id="@+id/OPE14"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/ope_bg"
+                    android:enabled="false"
+                    android:minHeight="48dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:singleLine="true"
+                    android:text="ЭНЕРГОМЕРА.ОПЕ-М14"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:typeface="sans" />
 
             </LinearLayout>
         </ScrollView>

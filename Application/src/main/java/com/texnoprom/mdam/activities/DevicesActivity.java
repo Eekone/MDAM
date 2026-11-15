@@ -9,6 +9,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.texnoprom.mdam.R;
 
@@ -22,6 +23,22 @@ public class DevicesActivity extends AppCompatActivity {
         setSupportActionBar(t);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        Button ptmBkm = (Button) findViewById(R.id.ptmBkm);
+        ptmBkm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(DevicesActivity.this, "В разработке", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        Button eltechBip = (Button) findViewById(R.id.eltechBip);
+        eltechBip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(DevicesActivity.this, "В разработке", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         Button OPE11 = (Button) findViewById(R.id.OPE11);
         OPE11.setOnClickListener(new View.OnClickListener() {
