@@ -55,6 +55,16 @@ public class Bkm1MeasureGuardTest {
     }
 
     @Test
+    public void cancel_forgetsAnUnfinishedMeasurement() {
+        Bkm1MeasureGuard guard = new Bkm1MeasureGuard();
+        guard.begin();
+        guard.cancel();
+        assertFalse(guard.isBusy());
+        assertNull(guard.accept(readFrame(new short[Bkm1MeasureGuard.COUNT])));
+        assertFalse(guard.consumed());
+    }
+
+    @Test
     public void withoutAVisibleList_readsTheBlockBeforeMeasuring() {
         Bkm1MeasureGuard guard = new Bkm1MeasureGuard();
         assertArrayEquals(Modbus.readHolding(15, 12), guard.begin());

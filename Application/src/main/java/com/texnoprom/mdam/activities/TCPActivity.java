@@ -32,6 +32,7 @@ import com.texnoprom.mdam.models.Register;
 import com.texnoprom.mdam.models.RegisterBatch;
 import com.texnoprom.mdam.models.RegisterInfo;
 import com.texnoprom.mdam.services.ApiHelper;
+import com.texnoprom.mdam.services.LocalArchive;
 import com.zgkxzx.modbus4And.requset.ModbusParam;
 import com.zgkxzx.modbus4And.requset.ModbusReq;
 import com.zgkxzx.modbus4And.requset.OnRequestBack;
@@ -49,7 +50,8 @@ public class TCPActivity extends AppCompatActivity {
     private String deviceName = "";
     private int deviceNumber;
     ModbusParam mModbusParam = new ModbusParam();
-    private ApiHelper apiHelper = new ApiHelper();
+    private ApiHelper apiHelper;
+    private boolean archived;
 
     public static final MediaType MEDIA_TYPE =
             MediaType.parse("application/json");
@@ -57,6 +59,7 @@ public class TCPActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        apiHelper = new ApiHelper(this);
         if (deviceName.equals("")) deviceName = getIntent().getStringExtra("deviceType");
         setTitle(deviceName);
 
@@ -257,9 +260,12 @@ public class TCPActivity extends AppCompatActivity {
                 registerBatch.getRegisters().add(reg);
             }
         }
+        archived = LocalArchive.add(this, registerBatch);
         apiHelper.postRegisters(registerBatch, postRegistersCallback);
+    }
 
-        // localDB.save(registerBatch);
+    private String archiveNote(String message) {
+        return archived ? message + ". Запись есть в локальном архиве" : message;
     }
 
     private Callback<Boolean> postRegistersCallback = new Callback<Boolean>() {
@@ -273,7 +279,7 @@ public class TCPActivity extends AppCompatActivity {
                     Toast.makeText(TCPActivity.this, "Регистры уже были загружены", Toast.LENGTH_SHORT).show();
                     break;
                 default:
-                    Toast.makeText(TCPActivity.this, "Ошибка", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TCPActivity.this, archiveNote("Ошибка"), Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -282,8 +288,7 @@ public class TCPActivity extends AppCompatActivity {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-
-                    Toast.makeText(TCPActivity.this, "Нет ответа", Toast.LENGTH_LONG).show();
+                    Toast.makeText(TCPActivity.this, archiveNote("Нет ответа"), Toast.LENGTH_LONG).show();
                 }
             });
         }

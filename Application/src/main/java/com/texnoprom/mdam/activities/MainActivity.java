@@ -59,7 +59,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Button archive = (Button) findViewById(R.id.archive_btn);
-        archive.setEnabled(false);
+        archive.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent startArchive = new Intent(MainActivity.this, ArchiveActivity.class);
+                MainActivity.this.startActivity(startArchive);
+            }
+        });
 
     }
 

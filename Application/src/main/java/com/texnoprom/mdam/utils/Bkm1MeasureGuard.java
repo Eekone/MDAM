@@ -26,6 +26,15 @@ public final class Bkm1MeasureGuard {
         return Modbus.readHolding(FIRST, COUNT);
     }
 
+    public void cancel() {
+        readingSnapshot = false;
+        waitingMeasure = false;
+        restoreAt = -1;
+        consumed = false;
+        finished = false;
+        saved = null;
+    }
+
     public boolean isBusy() {
         return readingSnapshot || waitingMeasure || restoreAt >= 0;
     }
