@@ -5,13 +5,16 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -22,9 +25,11 @@ import android.widget.Toast;
 import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.models.Register;
 import com.texnoprom.mdam.models.RegisterBatch;
+import com.texnoprom.mdam.models.RegisterInfo;
 import com.texnoprom.mdam.services.ApiHelper;
 import com.texnoprom.mdam.services.ArchiveWriter;
 import com.texnoprom.mdam.services.LocalArchive;
+import com.texnoprom.mdam.services.ScreenForm;
 import com.texnoprom.mdam.services.TaskStore;
 
 import java.text.SimpleDateFormat;
@@ -43,14 +48,19 @@ public class ArchiveActivity extends AppCompatActivity {
     private RecyclerView list;
     private TextView empty;
     private TextView meta;
+    private View actions;
     private List<RegisterBatch> batches = new ArrayList<>();
     private RegisterBatch opened;
     private int openedIndex = -1;
+    private boolean formMode;
+    private boolean formStored;
+    private final List<String> drafts = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_archive);
+        RegisterInfo.setContext(this);
         android.support.v7.widget.Toolbar toolbar =
                 (android.support.v7.widget.Toolbar) findViewById(R.id.archiveToolbar);
         setSupportActionBar(toolbar);
@@ -60,6 +70,19 @@ public class ArchiveActivity extends AppCompatActivity {
         list = (RecyclerView) findViewById(R.id.archive_list);
         empty = (TextView) findViewById(R.id.archive_empty);
         meta = (TextView) findViewById(R.id.archive_meta);
+        actions = findViewById(R.id.archive_actions);
+        ((Button) findViewById(R.id.archive_fill_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveForm();
+            }
+        });
+        ((Button) findViewById(R.id.archive_send_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendOpened();
+            }
+        });
         list.setLayoutManager(new LinearLayoutManager(this));
         showList();
     }
@@ -80,11 +103,11 @@ public class ArchiveActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        boolean record = opened != null;
-        menu.findItem(R.id.archive_fill).setVisible(!record);
+        boolean record = opened != null && !formMode;
+        menu.findItem(R.id.archive_fill).setVisible(opened == null || formMode);
         menu.findItem(R.id.archive_register).setVisible(record);
-        menu.findItem(R.id.archive_send).setVisible(record);
-        menu.findItem(R.id.archive_delete).setVisible(record);
+        menu.findItem(R.id.archive_send).setVisible(record || formMode);
+        menu.findItem(R.id.archive_delete).setVisible(record || (formMode && formStored));
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -95,7 +118,11 @@ public class ArchiveActivity extends AppCompatActivity {
             return true;
         }
         if (item.getItemId() == R.id.archive_fill) {
-            showFillDialog();
+            if (formMode) {
+                saveForm();
+            } else {
+                showFillDialog();
+            }
             return true;
         }
         if (item.getItemId() == R.id.archive_register) {
@@ -133,9 +160,13 @@ public class ArchiveActivity extends AppCompatActivity {
     private void showList() {
         opened = null;
         openedIndex = -1;
+        formMode = false;
+        formStored = false;
+        drafts.clear();
         batches = LocalArchive.load(this);
         setTitle("Локальный архив");
         meta.setVisibility(View.GONE);
+        actions.setVisibility(View.GONE);
         placeList(false);
         empty.setVisibility(batches.isEmpty() ? View.VISIBLE : View.GONE);
         list.setVisibility(batches.isEmpty() ? View.GONE : View.VISIBLE);
@@ -157,6 +188,12 @@ public class ArchiveActivity extends AppCompatActivity {
         setTitle(type);
         String who = text(opened.getUser());
         meta.setText((who.length() == 0 ? "Пользователь не указан" : who) + " · " + opened.getTimestamp());
+        if (table(opened.getScreen())) {
+            presentForm(opened, true);
+            return;
+        }
+        formMode = false;
+        actions.setVisibility(View.GONE);
         meta.setVisibility(View.VISIBLE);
         placeList(true);
         empty.setVisibility(View.GONE);
@@ -167,6 +204,9 @@ public class ArchiveActivity extends AppCompatActivity {
 
     private void sendOpened() {
         if (opened == null) {
+            return;
+        }
+        if (formMode && !storeForm(false)) {
             return;
         }
         new ApiHelper(this).postRegisters(opened, new Callback<Boolean>() {
@@ -232,7 +272,7 @@ public class ArchiveActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Запись в архив")
                 .setView(box)
-                .setPositiveButton("Сохранить", new android.content.DialogInterface.OnClickListener() {
+                .setPositiveButton("Открыть", new android.content.DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(android.content.DialogInterface dialog, int which) {
                         String who = user.getText().toString().trim();
@@ -242,17 +282,8 @@ public class ArchiveActivity extends AppCompatActivity {
                                     "Укажите пользователя и метку времени", Toast.LENGTH_LONG).show();
                             return;
                         }
-                        RegisterBatch batch = new RegisterBatch(when, (String) device.getSelectedItem(),
-                                new ArrayList<Register>());
-                        batch.setId(UUID.randomUUID().toString());
-                        batch.setUser(who);
-                        batch.setScreen((String) screen.getSelectedItem());
-                        if (!LocalArchive.addAny(ArchiveActivity.this, batch)) {
-                            Toast.makeText(ArchiveActivity.this, "Не удалось сохранить запись", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        showList();
-                        openById(batch.getId());
+                        presentForm(ScreenForm.blank((String) device.getSelectedItem(),
+                                (String) screen.getSelectedItem(), who, when), false);
                     }
                 })
                 .setNegativeButton("Отмена", null)
@@ -330,6 +361,79 @@ public class ArchiveActivity extends AppCompatActivity {
         }
         LocalArchive.replace(this, opened);
         openById(opened.getId());
+    }
+
+    private void presentForm(RegisterBatch batch, boolean stored) {
+        opened = batch;
+        formMode = true;
+        formStored = stored;
+        drafts.clear();
+        List<Register> rows = batch.getRegisters() == null ? new ArrayList<Register>() : batch.getRegisters();
+        for (Register register : rows) {
+            drafts.add(stored ? RegisterRows.format(register.getValue()) : "");
+        }
+        String type = batch.getType() == null ? "Запись" : batch.getType();
+        if (text(batch.getScreen()).length() > 0) {
+            type = type + " · " + batch.getScreen();
+        }
+        setTitle(type);
+        String who = text(batch.getUser());
+        meta.setText((who.length() == 0 ? "Пользователь не указан" : who) + " · " + batch.getTimestamp());
+        actions.setVisibility(View.VISIBLE);
+        meta.setVisibility(View.VISIBLE);
+        placeList(true);
+        empty.setVisibility(View.GONE);
+        list.setVisibility(View.VISIBLE);
+        list.setAdapter(new FormAdapter());
+        invalidateOptionsMenu();
+    }
+
+    private void saveForm() {
+        storeForm(true);
+    }
+
+    private boolean storeForm(boolean announce) {
+        if (opened == null || opened.getRegisters() == null || drafts.size() != opened.getRegisters().size()) {
+            return false;
+        }
+        List<Register> rows = opened.getRegisters();
+        for (int i = 0; i < rows.size(); i++) {
+            String raw = drafts.get(i) == null ? "" : drafts.get(i).trim().replace(',', '.');
+            float value = 0f;
+            if (raw.length() > 0) {
+                try {
+                    value = Float.parseFloat(raw);
+                } catch (NumberFormatException ex) {
+                    Toast.makeText(this, "Некорректное значение в строке " + (rows.get(i).getNumber() + 1),
+                            Toast.LENGTH_LONG).show();
+                    return false;
+                }
+            }
+            rows.get(i).setValue(value);
+        }
+        boolean ok = formStored ? LocalArchive.replace(this, opened) : LocalArchive.addAny(this, opened);
+        if (!ok) {
+            Toast.makeText(this, "Не удалось сохранить запись", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        if (!formStored) {
+            openedIndex = 0;
+        }
+        formStored = true;
+        if (announce) {
+            Toast.makeText(this, "Записано в архив", Toast.LENGTH_SHORT).show();
+        }
+        invalidateOptionsMenu();
+        return true;
+    }
+
+    private static boolean table(String screen) {
+        for (String item : ArchiveWriter.SCREENS) {
+            if (item.equals(screen)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void openById(String id) {
@@ -439,7 +543,7 @@ public class ArchiveActivity extends AppCompatActivity {
             return registers.size();
         }
 
-        private static String format(float value) {
+        static String format(float value) {
             float rounded = Math.round(value * 100f) / 100f;
             if (Math.abs(rounded - Math.round(rounded)) < 0.001f) {
                 return String.valueOf((long) Math.round(rounded));
@@ -459,6 +563,67 @@ public class ArchiveActivity extends AppCompatActivity {
                 title = (TextView) itemView.findViewById(R.id.regTitle);
                 value = (TextView) itemView.findViewById(R.id.regValue);
                 unit = (TextView) itemView.findViewById(R.id.regUnit);
+            }
+        }
+    }
+
+    private class FormAdapter extends RecyclerView.Adapter<FormAdapter.Holder> {
+        @Override
+        public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_form_row, parent, false);
+            return new Holder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(final Holder holder, int position) {
+            Register register = opened.getRegisters().get(position);
+            holder.number.setText((register.getNumber() + 1) + ". ");
+            holder.title.setText(register.getName() == null ? "" : register.getName());
+            holder.unit.setText(register.getUnit() == null ? "" : register.getUnit());
+            holder.binding = true;
+            holder.value.setText(position < drafts.size() ? drafts.get(position) : "");
+            holder.binding = false;
+        }
+
+        @Override
+        public int getItemCount() {
+            return opened == null || opened.getRegisters() == null ? 0 : opened.getRegisters().size();
+        }
+
+        class Holder extends RecyclerView.ViewHolder {
+            final TextView number;
+            final TextView title;
+            final EditText value;
+            final TextView unit;
+            boolean binding;
+
+            Holder(View itemView) {
+                super(itemView);
+                number = (TextView) itemView.findViewById(R.id.regNumber);
+                title = (TextView) itemView.findViewById(R.id.regTitle);
+                value = (EditText) itemView.findViewById(R.id.formValue);
+                unit = (TextView) itemView.findViewById(R.id.regUnit);
+                value.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        if (binding) {
+                            return;
+                        }
+                        int pos = getAdapterPosition();
+                        if (pos >= 0 && pos < drafts.size()) {
+                            drafts.set(pos, s.toString());
+                        }
+                    }
+                });
             }
         }
     }
