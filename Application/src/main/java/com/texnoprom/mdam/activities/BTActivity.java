@@ -41,6 +41,7 @@ import com.texnoprom.mdam.models.RegisterBatch;
 import com.texnoprom.mdam.models.RegisterInfo;
 import com.texnoprom.mdam.services.ApiHelper;
 import com.texnoprom.mdam.services.LocalArchive;
+import com.texnoprom.mdam.services.TaskStore;
 import com.texnoprom.mdam.utils.Bkm1MeasureGuard;
 import com.texnoprom.mdam.utils.Modbus;
 
@@ -573,17 +574,29 @@ public class BTActivity extends AppCompatActivity
         return archived ? message + ". Запись есть в локальном архиве" : message;
     }
 
+    private void finishOpenedTask() {
+        String taskId = getIntent() == null ? null : getIntent().getStringExtra("taskId");
+        if (taskId != null && taskId.length() > 0) {
+            TaskStore.complete(this, taskId);
+        }
+    }
+
     private Callback<Boolean> postRegistersCallback = new Callback<Boolean>() {
         @Override
         public void onResponse(retrofit2.Call<Boolean> call, retrofit2.Response<Boolean> response) {
             switch (response.code()) {
                 case 201:
+                    finishOpenedTask();
                     Toast.makeText(BTActivity.this, "Успешно загружено", Toast.LENGTH_SHORT).show();
                     break;
                 case 409:
+                    finishOpenedTask();
                     Toast.makeText(BTActivity.this, "Регистры уже были загружены", Toast.LENGTH_SHORT).show();
                     break;
                 default:
+                    if (archived) {
+                        finishOpenedTask();
+                    }
                     Toast.makeText(BTActivity.this, archiveNote("Ошибка"), Toast.LENGTH_SHORT).show();
             }
         }
@@ -593,6 +606,9 @@ public class BTActivity extends AppCompatActivity
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
+                    if (archived) {
+                        finishOpenedTask();
+                    }
                     Toast.makeText(BTActivity.this, archiveNote("Нет ответа"), Toast.LENGTH_LONG).show();
                 }
             });

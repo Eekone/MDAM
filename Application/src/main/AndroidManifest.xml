@@ -91,6 +91,10 @@
             android:label="Локальный архив"
             android:parentActivityName=".activities.MainActivity" />
         <activity
+            android:name=".activities.TasksActivity"
+            android:label="Мои задачи"
+            android:parentActivityName=".activities.MainActivity" />
+        <activity
             android:name=".activities.TCTActivity"
             android:label="База данных ТСТ"
             android:parentActivityName=".activities.MainActivity" />
