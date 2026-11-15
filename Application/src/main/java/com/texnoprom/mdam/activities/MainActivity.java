@@ -47,7 +47,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Button tasks = (Button) findViewById(R.id.tasks_btn);
-        tasks.setEnabled(false);
+        tasks.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent startTasks = new Intent(MainActivity.this, TasksActivity.class);
+                MainActivity.this.startActivity(startTasks);
+            }
+        });
 
         Button tct = (Button) findViewById(R.id.tct_button);
         tct.setOnClickListener(new View.OnClickListener() {
