@@ -40,6 +40,7 @@ import com.texnoprom.mdam.fragments.ValuesFragment;
 import com.texnoprom.mdam.models.RegisterBatch;
 import com.texnoprom.mdam.models.RegisterInfo;
 import com.texnoprom.mdam.services.ApiHelper;
+import com.texnoprom.mdam.services.LocalArchive;
 import com.texnoprom.mdam.utils.Bkm1MeasureGuard;
 import com.texnoprom.mdam.utils.Modbus;
 
@@ -58,6 +59,7 @@ public class BTActivity extends AppCompatActivity
 
     ApiHelper apiHelper;
     boolean gonnaBeSaved = false;
+    private boolean archived;
     private final Bkm1MeasureGuard measureGuard = new Bkm1MeasureGuard();
     private boolean awaitingConfig;
     private boolean holdForConfig;
@@ -367,6 +369,7 @@ public class BTActivity extends AppCompatActivity
         }
         if (gonnaBeSaved) {
             RegisterBatch registerBatch = Modbus.RegistersFromData(data, deviceType, 0);
+            archived = LocalArchive.add(this, registerBatch);
             apiHelper.postRegisters(registerBatch, postRegistersCallback);
             gonnaBeSaved = false;
             return;
@@ -558,11 +561,16 @@ public class BTActivity extends AppCompatActivity
             case 1: {
                 if (!(grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    Toast.makeText(BTActivity.this, "Нет разрешения на доступ к файловой системе. " +
-                            "Сохранение будет недоступно.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(BTActivity.this,
+                            "Нет разрешения на общую память. Локальный архив приложения доступен.",
+                            Toast.LENGTH_SHORT).show();
                 }
             }
         }
+    }
+
+    private String archiveNote(String message) {
+        return archived ? message + ". Запись есть в локальном архиве" : message;
     }
 
     private Callback<Boolean> postRegistersCallback = new Callback<Boolean>() {
@@ -576,7 +584,7 @@ public class BTActivity extends AppCompatActivity
                     Toast.makeText(BTActivity.this, "Регистры уже были загружены", Toast.LENGTH_SHORT).show();
                     break;
                 default:
-                    Toast.makeText(BTActivity.this, "Ошибка", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(BTActivity.this, archiveNote("Ошибка"), Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -585,8 +593,7 @@ public class BTActivity extends AppCompatActivity
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-
-                    Toast.makeText(BTActivity.this, "Нет ответа", Toast.LENGTH_LONG).show();
+                    Toast.makeText(BTActivity.this, archiveNote("Нет ответа"), Toast.LENGTH_LONG).show();
                 }
             });
         }

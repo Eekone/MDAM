@@ -3,8 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.texnoprom.mdam.activities.ArchiveActivity"
-    tools:ignore="RtlHardcoded">
+    tools:context="com.texnoprom.mdam.activities.ArchiveActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/archive_toolbar"
@@ -19,45 +18,20 @@
             android:background="?attr/colorPrimary" />
     </android.support.design.widget.AppBarLayout>
 
-    <RelativeLayout
-        android:layout_below="@id/archive_toolbar"
+    <TextView
+        android:id="@+id/archive_empty"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_below="@id/archive_toolbar"
+        android:gravity="center_horizontal"
+        android:padding="24dp"
+        android:text="В архиве пока нет записей. Сохраните показания на экране модуля."
+        android:textSize="16sp" />
 
-        <Button
-            android:id="@+id/buttonAdd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:onClick="onAddButtonClick"
-            android:text="@string/add" />
-
-        <EditText
-            android:id="@+id/editTextNote"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/buttonAdd"
-            android:hint="@string/enter_new_note"
-            android:imeOptions="actionDone"
-            android:inputType="text" />
-
-        <TextView
-            android:id="@+id/textViewNoteInstructions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/editTextNote"
-            android:gravity="center_horizontal"
-            android:paddingBottom="8dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:text="@string/click_to_remove"
-            android:textSize="12sp" />
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclerViewNotes"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/textViewNoteInstructions"
-            android:scrollbars="vertical" />
-    </RelativeLayout>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/archive_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/archive_toolbar"
+        android:scrollbars="vertical" />
 </RelativeLayout>
