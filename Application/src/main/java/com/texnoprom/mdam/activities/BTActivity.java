@@ -40,7 +40,7 @@ import com.texnoprom.mdam.fragments.ValuesFragment;
 import com.texnoprom.mdam.models.RegisterBatch;
 import com.texnoprom.mdam.models.RegisterInfo;
 import com.texnoprom.mdam.services.ApiHelper;
-import com.texnoprom.mdam.services.LocalArchive;
+import com.texnoprom.mdam.services.ArchiveWriter;
 import com.texnoprom.mdam.services.TaskStore;
 import com.texnoprom.mdam.utils.Bkm1MeasureGuard;
 import com.texnoprom.mdam.utils.Modbus;
@@ -370,7 +370,7 @@ public class BTActivity extends AppCompatActivity
         }
         if (gonnaBeSaved) {
             RegisterBatch registerBatch = Modbus.RegistersFromData(data, deviceType, 0);
-            archived = LocalArchive.add(this, registerBatch);
+            archived = ArchiveWriter.saveRead(this, registerBatch, ArchiveWriter.SAVED);
             apiHelper.postRegisters(registerBatch, postRegistersCallback);
             gonnaBeSaved = false;
             return;
@@ -406,6 +406,7 @@ public class BTActivity extends AppCompatActivity
         }
         awaitingConfig = false;
         connectedConfig = Modbus.RegistersFromData(data, deviceType, 10);
+        ArchiveWriter.saveRead(this, connectedConfig, ArchiveWriter.CONFIG);
         Fragment found = getSupportFragmentManager().findFragmentByTag("config");
         if (found instanceof ConfigFragment) {
             ((ConfigFragment) found).showRegisters(connectedConfig);

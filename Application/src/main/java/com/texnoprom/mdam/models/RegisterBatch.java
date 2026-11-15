@@ -10,6 +10,9 @@ import java.util.Locale;
 public class RegisterBatch {
     private String timestamp;
     private String type;
+    private String user = "";
+    private String screen = "";
+    private String id;
 
     private List<Register> registers = new ArrayList<>();
     private static SimpleDateFormat dateFormat;
@@ -51,6 +54,30 @@ public class RegisterBatch {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user == null ? "" : user;
+    }
+
+    public String getScreen() {
+        return screen;
+    }
+
+    public void setScreen(String screen) {
+        this.screen = screen == null ? "" : screen;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public List<Register> getRegisters() {

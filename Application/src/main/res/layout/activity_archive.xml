@@ -19,13 +19,22 @@
     </android.support.design.widget.AppBarLayout>
 
     <TextView
+        android:id="@+id/archive_meta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/archive_toolbar"
+        android:padding="12dp"
+        android:textSize="16sp"
+        android:visibility="gone" />
+
+    <TextView
         android:id="@+id/archive_empty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/archive_toolbar"
         android:gravity="center_horizontal"
         android:padding="24dp"
-        android:text="В архиве пока нет записей. Сохраните показания на экране модуля."
+        android:text="В архиве пока нет записей. Они появляются при чтении регистров и по кнопке «Заполнить»."
         android:textSize="16sp" />
 
     <android.support.v7.widget.RecyclerView

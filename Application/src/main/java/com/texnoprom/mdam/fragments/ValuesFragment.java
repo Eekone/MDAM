@@ -16,6 +16,7 @@ import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.activities.BTActivity;
 import com.texnoprom.mdam.adapters.RegisterAdapter;
 import com.texnoprom.mdam.models.RegisterBatch;
+import com.texnoprom.mdam.services.ArchiveWriter;
 import com.texnoprom.mdam.utils.Modbus;
 
 
@@ -57,6 +58,7 @@ public class ValuesFragment extends Fragment {
             if ("БКМ1".equals(deviceType)) {
                 Modbus.applyBkm1ValueScale(registerBatch.getRegisters());
             }
+            ArchiveWriter.saveRead(getActivity(), registerBatch, ArchiveWriter.VALUES);
             RegisterAdapter adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
             listView.setAdapter(adapter);
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

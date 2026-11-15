@@ -34,6 +34,21 @@ public class LocalArchiveTest {
     }
 
     @Test
+    public void manualRecord_keepsUserTimeAndScreen() {
+        RegisterBatch batch = new RegisterBatch("15/11/2026 19:10:00", "БКМ1", new ArrayList<Register>());
+        batch.setUser("Иван");
+        batch.setScreen("Калибровки");
+        batch.setId("manual-1");
+        List<RegisterBatch> loaded = LocalArchive.decode(LocalArchive.encode(list(batch)));
+
+        assertEquals(1, loaded.size());
+        assertEquals("Иван", loaded.get(0).getUser());
+        assertEquals("15/11/2026 19:10:00", loaded.get(0).getTimestamp());
+        assertEquals("Калибровки", loaded.get(0).getScreen());
+        assertTrue(loaded.get(0).getRegisters().isEmpty());
+    }
+
+    @Test
     public void batchWithoutRegisters_isNotStored() {
         assertFalse(LocalArchive.keep(new RegisterBatch("БКМ1")));
         assertTrue(LocalArchive.keep(sample("БКМ4", "15/11/2026 17:41:00", 12f)));

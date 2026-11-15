@@ -32,7 +32,7 @@ import com.texnoprom.mdam.models.Register;
 import com.texnoprom.mdam.models.RegisterBatch;
 import com.texnoprom.mdam.models.RegisterInfo;
 import com.texnoprom.mdam.services.ApiHelper;
-import com.texnoprom.mdam.services.LocalArchive;
+import com.texnoprom.mdam.services.ArchiveWriter;
 import com.texnoprom.mdam.services.TaskStore;
 import com.zgkxzx.modbus4And.requset.ModbusParam;
 import com.zgkxzx.modbus4And.requset.ModbusReq;
@@ -261,7 +261,7 @@ public class TCPActivity extends AppCompatActivity {
                 registerBatch.getRegisters().add(reg);
             }
         }
-        archived = LocalArchive.add(this, registerBatch);
+        archived = ArchiveWriter.saveRead(this, registerBatch, ArchiveWriter.SAVED);
         apiHelper.postRegisters(registerBatch, postRegistersCallback);
     }
 

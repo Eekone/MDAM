@@ -3,9 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/archive_fill"
+        android:title="Заполнить"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/archive_register"
+        android:title="Добавить регистр"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/archive_send"
         android:title="Отправить на сервер"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/archive_delete"

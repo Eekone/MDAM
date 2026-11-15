@@ -16,6 +16,7 @@ import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.activities.BTActivity;
 import com.texnoprom.mdam.adapters.RegisterAdapter;
 import com.texnoprom.mdam.models.RegisterBatch;
+import com.texnoprom.mdam.services.ArchiveWriter;
 import com.texnoprom.mdam.utils.Modbus;
 
 
@@ -96,7 +97,9 @@ public class ConfigFragment extends Fragment {
 
     public void handleInputData(byte[] data, String deviceType) {
         if (data != null && data.length > 2 && (data[1] & 0xFF) == 3 && Modbus.holdingValues(data, 5) != null) {
-            showRegisters(Modbus.RegistersFromData(data, deviceType, 10));
+            RegisterBatch read = Modbus.RegistersFromData(data, deviceType, 10);
+            showRegisters(read);
+            ArchiveWriter.saveRead(getActivity(), read, ArchiveWriter.CONFIG);
         } else if (srl != null) {
             srl.setRefreshing(false);
         }
