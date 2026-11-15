@@ -1,10 +1,13 @@
 package com.texnoprom.mdam.services;
 
+import android.content.Context;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.texnoprom.mdam.models.CustomData;
 import com.texnoprom.mdam.models.ParameterType;
 import com.texnoprom.mdam.models.RegisterBatch;
+import com.texnoprom.mdam.utils.ServerAddress;
 
 import java.util.List;
 
@@ -15,36 +18,43 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiHelper {
 
-    private final static String BASE_URL = "http://zav.texnoprom.com:8080";
-
-    private Retrofit retrofit;
+    private final Context appContext;
+    private String baseUrl;
     private ApiHelperInterface apiInterface;
 
-    public ApiHelper() {
-        Gson gson = new GsonBuilder()
-                .setLenient()
-                .create();
+    public ApiHelper(Context context) {
+        appContext = context.getApplicationContext();
+        client();
+    }
 
-        retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
-
-        apiInterface = retrofit.create(ApiHelperInterface.class);
+    private ApiHelperInterface client() {
+        String url = ServerAddress.get(appContext);
+        if (apiInterface == null || !url.equals(baseUrl)) {
+            Gson gson = new GsonBuilder()
+                    .setLenient()
+                    .create();
+            baseUrl = url;
+            apiInterface = new Retrofit.Builder()
+                    .baseUrl(url)
+                    .addConverterFactory(GsonConverterFactory.create(gson))
+                    .build()
+                    .create(ApiHelperInterface.class);
+        }
+        return apiInterface;
     }
 
     public void getParameterTypes(Callback<List<ParameterType>> callback) {
-        Call<List<ParameterType>> call = apiInterface.getParameterTypes();
+        Call<List<ParameterType>> call = client().getParameterTypes();
         call.enqueue(callback);
     }
 
     public void getCustomData(Callback<List<CustomData>> callback) {
-        Call<List<CustomData>> call = apiInterface.getCustomData();
+        Call<List<CustomData>> call = client().getCustomData();
         call.enqueue(callback);
     }
 
     public void postRegisters(RegisterBatch registerBatch, Callback<Boolean> callback) {
-        apiInterface.postRegisters(registerBatch).enqueue(callback);
+        client().postRegisters(registerBatch).enqueue(callback);
     }
 
 }

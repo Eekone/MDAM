@@ -49,7 +49,7 @@ public class TCPActivity extends AppCompatActivity {
     private String deviceName = "";
     private int deviceNumber;
     ModbusParam mModbusParam = new ModbusParam();
-    private ApiHelper apiHelper = new ApiHelper();
+    private ApiHelper apiHelper;
 
     public static final MediaType MEDIA_TYPE =
             MediaType.parse("application/json");
@@ -57,6 +57,7 @@ public class TCPActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        apiHelper = new ApiHelper(this);
         if (deviceName.equals("")) deviceName = getIntent().getStringExtra("deviceType");
         setTitle(deviceName);
 
