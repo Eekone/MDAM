@@ -31,7 +31,7 @@ public class TCTFragment extends Fragment implements SwipeRefreshLayout.OnRefres
 
 
     private RecyclerView mRecyclerView;
-    private ApiHelper apiHelper = new ApiHelper();
+    private ApiHelper apiHelper;
 
     SwipeRefreshLayout srl;
     public String queryType;
@@ -50,6 +50,14 @@ public class TCTFragment extends Fragment implements SwipeRefreshLayout.OnRefres
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.queryType = getArguments().getString("queryType");
+        apiHelper = new ApiHelper(getActivity());
+    }
+
+    public void reload() {
+        if (srl == null || getActivity() == null) {
+            return;
+        }
+        getData();
     }
 
     @Nullable
@@ -75,6 +83,7 @@ public class TCTFragment extends Fragment implements SwipeRefreshLayout.OnRefres
     }
 
     private void getData() {
+        apiHelper = new ApiHelper(getActivity());
         srl.setRefreshing(true);
         mRecyclerView.setAdapter(null);
         switch (queryType) {

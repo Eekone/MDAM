@@ -56,7 +56,7 @@ public class BTActivity extends AppCompatActivity
     Menu menuNav;
     String deviceType, userName, currentFragment;
 
-    ApiHelper apiHelper = new ApiHelper();
+    ApiHelper apiHelper;
     boolean gonnaBeSaved = false;
     private final Bkm1MeasureGuard measureGuard = new Bkm1MeasureGuard();
 
@@ -71,6 +71,7 @@ public class BTActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        apiHelper = new ApiHelper(this);
         deviceType = getIntent().getStringExtra("deviceType");
         setTitle(deviceType);
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
