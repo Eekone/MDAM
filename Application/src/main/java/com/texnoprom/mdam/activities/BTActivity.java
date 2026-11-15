@@ -61,6 +61,8 @@ public class BTActivity extends AppCompatActivity
     ApiHelper apiHelper;
     boolean gonnaBeSaved = false;
     private boolean archived;
+    private boolean awaitingMeasureEcho;
+    private boolean saveAfterMeasure;
     private final Bkm1MeasureGuard measureGuard = new Bkm1MeasureGuard();
     private boolean awaitingConfig;
     private boolean holdForConfig;
@@ -217,9 +219,12 @@ public class BTActivity extends AppCompatActivity
             switch (item.getItemId()) {
                 case R.id.nav_measure:
                     cancelCalibrationRead();
+                    saveAfterMeasure = false;
                     if ("БКМ1".equals(deviceType)) {
+                        awaitingMeasureEcho = false;
                         sen(measureGuard.begin());
                     } else {
+                        awaitingMeasureEcho = true;
                         sen(Modbus.MEASURE);
                     }
                     break;
@@ -307,6 +312,8 @@ public class BTActivity extends AppCompatActivity
         inflight = null;
         queued = null;
         gonnaBeSaved = false;
+        awaitingMeasureEcho = false;
+        saveAfterMeasure = false;
         exchange.removeCallbacks(connectRead);
         exchange.removeCallbacks(exchangeTimeout);
         measureGuard.cancel();
@@ -361,9 +368,20 @@ public class BTActivity extends AppCompatActivity
                 }
                 if (measureGuard.finished()) {
                     reloadOpenCalibration();
+                    saveAfterMeasure = true;
+                    sen(Modbus.ALL);
                 }
                 return;
             }
+        }
+        if (awaitingMeasureEcho && data != null && data.length > 1 && (data[1] & 0xFF) == 5) {
+            awaitingMeasureEcho = false;
+            saveAfterMeasure = true;
+            sen(Modbus.ALL);
+            return;
+        }
+        if (takeMeasuredRegisters(data)) {
+            return;
         }
         if (takeConfigReply(data)) {
             return;
@@ -400,13 +418,26 @@ public class BTActivity extends AppCompatActivity
         }
     }
 
+    private boolean takeMeasuredRegisters(byte[] data) {
+        if (!saveAfterMeasure || Modbus.holdingValues(data, 41) == null) {
+            return false;
+        }
+        saveAfterMeasure = false;
+        RegisterBatch measured = Modbus.RegistersFromData(data, deviceType, 0);
+        if ("БКМ1".equals(deviceType)) {
+            Modbus.applyBkm1ValueScale(measured.getRegisters());
+        }
+        archived = ArchiveWriter.saveRead(this, measured, ArchiveWriter.MEASUREMENT);
+        apiHelper.postRegisters(measured, postRegistersCallback);
+        return true;
+    }
+
     private boolean takeConfigReply(byte[] data) {
         if (!awaitingConfig || Modbus.holdingValues(data, 5) == null) {
             return false;
         }
         awaitingConfig = false;
         connectedConfig = Modbus.RegistersFromData(data, deviceType, 10);
-        ArchiveWriter.saveRead(this, connectedConfig, ArchiveWriter.CONFIG);
         Fragment found = getSupportFragmentManager().findFragmentByTag("config");
         if (found instanceof ConfigFragment) {
             ((ConfigFragment) found).showRegisters(connectedConfig);

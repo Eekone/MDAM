@@ -14,6 +14,7 @@ public final class ArchiveWriter {
     public static final String CALIBRATION = "Калибровки";
     public static final String MISC = "Прочее";
     public static final String SAVED = "Сохранение";
+    public static final String MEASUREMENT = "Измерение";
     public static final String[] SCREENS = {VALUES, CONFIG, CALIBRATION, MISC};
 
     private ArchiveWriter() {

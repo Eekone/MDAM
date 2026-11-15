@@ -14,8 +14,8 @@
 
     <item
         android:id="@+id/archive_send"
-        android:title="Отправить на сервер"
-        app:showAsAction="never" />
+        android:title="Передать в СКМ"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/archive_delete"

@@ -23,7 +23,6 @@ import com.texnoprom.mdam.adapters.RegisterAdapter;
 import com.texnoprom.mdam.models.Register;
 import com.texnoprom.mdam.models.RegisterBatch;
 import com.texnoprom.mdam.utils.Bkm1EnteredCalibrationWrite;
-import com.texnoprom.mdam.services.ArchiveWriter;
 import com.texnoprom.mdam.utils.Modbus;
 
 
@@ -184,12 +183,10 @@ public class CalibrationsFragment extends Fragment {
                     }
                 }
                 showRegisters();
-                ArchiveWriter.saveRead(getActivity(), registerBatch, ArchiveWriter.CALIBRATION);
             }
         } else {
             registerBatch = Modbus.RegistersFromData(data, deviceType, expectedStart);
             showRegisters();
-            ArchiveWriter.saveRead(getActivity(), registerBatch, ArchiveWriter.CALIBRATION);
         }
         expectedCount = 0;
     }

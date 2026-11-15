@@ -34,7 +34,7 @@
         android:layout_below="@id/archive_toolbar"
         android:gravity="center_horizontal"
         android:padding="24dp"
-        android:text="В архиве пока нет записей. Они появляются при чтении регистров и по кнопке «Заполнить»."
+        android:text="В архиве пока нет записей. Они появляются после «Провести измерение» и по кнопке «Заполнить»."
         android:textSize="16sp" />
 
     <android.support.v7.widget.RecyclerView

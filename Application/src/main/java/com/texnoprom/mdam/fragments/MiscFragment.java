@@ -19,7 +19,6 @@ import com.texnoprom.mdam.R;
 import com.texnoprom.mdam.activities.BTActivity;
 import com.texnoprom.mdam.adapters.RegisterAdapter;
 import com.texnoprom.mdam.models.RegisterBatch;
-import com.texnoprom.mdam.services.ArchiveWriter;
 import com.texnoprom.mdam.utils.Modbus;
 
 
@@ -58,7 +57,6 @@ public class MiscFragment extends Fragment {
         if (data[1] == 3) {
             srl.setRefreshing(false);
             registerBatch = Modbus.RegistersFromData(data, deviceType, 30);
-            ArchiveWriter.saveRead(getActivity(), registerBatch, ArchiveWriter.MISC);
             RegisterAdapter adapter = new RegisterAdapter(registerBatch.getRegisters(), getActivity());
             listView.setAdapter(adapter);
             listView.setSelectionFromTop(position, top);
