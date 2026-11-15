@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="5dp"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+    android:layout_marginTop="5dp"
+    android:background="@drawable/layout_bg"
+    android:paddingBottom="8dp">
+
+    <TextView
+        android:id="@+id/regNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/regTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/regNumber"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:maxWidth="300dp"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/formValue"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/regTitle"
+        android:layout_alignParentStart="true"
+        android:hint="значение"
+        android:inputType="numberDecimal|numberSigned"
+        android:singleLine="true" />
+
+    <TextView
+        android:id="@+id/regUnit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/formValue"
+        android:layout_toRightOf="@id/formValue"
+        android:paddingLeft="8dp"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+</RelativeLayout>

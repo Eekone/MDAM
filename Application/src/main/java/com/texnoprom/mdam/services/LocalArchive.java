@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.texnoprom.mdam.models.Register;
 import com.texnoprom.mdam.models.RegisterBatch;
 
 import java.io.File;
@@ -56,6 +57,51 @@ public final class LocalArchive {
         return batch != null && batch.getRegisters() != null && !batch.getRegisters().isEmpty();
     }
 
+    /** Ручная запись может состоять из пользователя и времени, ещё без регистров. */
+    public static boolean visible(RegisterBatch batch) {
+        if (keep(batch)) {
+            return true;
+        }
+        if (batch == null) {
+            return false;
+        }
+        return text(batch.getUser()).length() > 0 || text(batch.getScreen()).length() > 0;
+    }
+
+    public static boolean addAny(Context context, RegisterBatch batch) {
+        if (!visible(batch)) {
+            return false;
+        }
+        if (batch.getRegisters() == null) {
+            batch.setRegisters(new ArrayList<Register>());
+        }
+        synchronized (LOCK) {
+            List<RegisterBatch> all = read(context);
+            all.add(0, batch);
+            return write(context, all);
+        }
+    }
+
+    public static boolean replace(Context context, RegisterBatch batch) {
+        if (batch == null || batch.getId() == null) {
+            return false;
+        }
+        synchronized (LOCK) {
+            List<RegisterBatch> all = read(context);
+            for (int i = 0; i < all.size(); i++) {
+                if (batch.getId().equals(all.get(i).getId())) {
+                    all.set(i, batch);
+                    return write(context, all);
+                }
+            }
+            return false;
+        }
+    }
+
+    private static String text(String value) {
+        return value == null ? "" : value.trim();
+    }
+
     public static String encode(List<RegisterBatch> batches) {
         return GSON.toJson(batches == null ? new ArrayList<RegisterBatch>() : batches);
     }
@@ -71,7 +117,7 @@ public final class LocalArchive {
             }
             List<RegisterBatch> kept = new ArrayList<>();
             for (RegisterBatch batch : parsed) {
-                if (keep(batch)) {
+                if (visible(batch)) {
                     kept.add(batch);
                 }
             }
