@@ -131,7 +131,6 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:background="@drawable/ope_bg"
-                    android:enabled="false"
                     android:minHeight="48dp"
                     android:paddingLeft="8dp"
                     android:paddingRight="8dp"
