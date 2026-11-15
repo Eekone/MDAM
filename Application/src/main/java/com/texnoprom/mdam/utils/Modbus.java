@@ -160,7 +160,7 @@ public class Modbus {
      * Экран «Значения» БКМ1. Номер строки на экране на 1 больше адреса регистра.
      * [1]–[3] хранят сотые, знак как в модуле.
      * [8] температура — десятые.
-     * [9] батарея — код АЦП 0…65535 на шкале 0…1000.
+     * [9] батарея хранит сотые вольта: 380 в регистре — это 3,80 В.
      * [4]–[7] и [10] показываются как есть.
      */
     public static void applyBkm1ValueScale(List<Register> registers) {
@@ -176,7 +176,7 @@ public class Modbus {
             } else if (number == 7) {
                 shown = raw * 0.1f;
             } else if (number == 8) {
-                shown = (raw & 0xFFFF) * 1000f / 65536f;
+                shown = (raw & 0xFFFF) * 0.01f;
             }
             register.setValue(shown);
         }

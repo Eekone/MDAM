@@ -44,6 +44,7 @@ public class BluetoothService {
     private BluetoothDevice mLastDevice;
     private boolean userStop;
     private boolean reconnecting;
+    private int reconnectGeneration;
 
     // Constructor. Prepares a new BluetoothChat session
     // context : The UI Activity Context
@@ -122,6 +123,7 @@ public class BluetoothService {
     // device : The BluetoothDevice to connect
     // secure : Socket Security type - Secure (true) , Insecure (false)
     public synchronized void connect(BluetoothDevice device) {
+        reconnectGeneration++;
         userStop = false;
         mLastDevice = device;
         // Cancel any thread attempting to make a connection
@@ -188,6 +190,7 @@ public class BluetoothService {
 
     // Stop all threads
     public synchronized void stop() {
+        reconnectGeneration++;
         userStop = true;
         reconnecting = false;
         if (mConnectThread != null) {
@@ -263,10 +266,12 @@ public class BluetoothService {
     private void connectionLost() {
         ConnectedThread dead;
         final BluetoothDevice again;
+        final int generation;
         synchronized (this) {
             dead = mConnectedThread;
             mConnectedThread = null;
             again = mLastDevice;
+            generation = ++reconnectGeneration;
         }
         if (dead != null && Thread.currentThread() != dead) {
             dead.cancel();
@@ -277,9 +282,13 @@ public class BluetoothService {
             mWriter.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if (!userStop) {
-                        connect(again);
+                    synchronized (BluetoothService.this) {
+                        if (userStop || generation != reconnectGeneration) {
+                            reconnecting = false;
+                            return;
+                        }
                     }
+                    connect(again);
                 }
             }, 500);
             return;
