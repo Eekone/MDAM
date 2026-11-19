@@ -1,6 +1,6 @@
 <resources>
 
-    <string name="app_name">ММСД</string>
+    <string name="app_name">ПТМ.ММКМ.001</string>
     <string name="action_settings">Настройки</string>
     <string name="title_activity_device_list">Обнаруженные устройства</string>
     <string name="title_activity_terminal">Терминал</string>
@@ -20,7 +20,7 @@
     <string name="title_activity_login">Авторизация</string>
 
     <!-- LoginActivity -->
-    <string name="auth_welcome">Добро пожаловать в ММСД!\n Пожалуйста, авторизуйтесь</string>
+    <string name="auth_welcome">Добро пожаловать в ПТМ.ММКМ.001!\nМобильный модуль коррозионного мониторинга.\nПожалуйста, авторизуйтесь</string>
     <string name="sign_in">Войти</string>
     <string name="prompt_password">Пароль</string>
     <string name="prompt_name">Имя пользователя</string>
