@@ -45,7 +45,7 @@
                     android:paddingLeft="8dp"
                     android:paddingRight="8dp"
                     android:singleLine="true"
-                    android:text="ПТМ.ММКМ.001"
+                    android:text="ПТМ.РПКЗ.001"
                     android:textAllCaps="false"
                     android:textSize="16sp"
                     android:typeface="sans" />
